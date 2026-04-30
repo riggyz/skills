@@ -6,6 +6,7 @@
   "description": "Generic Agent Skills source repo and tooling.",
   "scripts": {
     "configure:attribution": "tsx skills/attribution/scripts/configure-attribution.ts",
+    "configure:brain": "tsx skills/brain/scripts/configure-brain.ts",
     "skills:list": "skills add . --list --full-depth",
     "skills:validate": "npm run skills:validate:attribution && npm run skills:validate:brain && npm run skills:validate:deep-dive && npm run skills:validate:skill-creator",
     "skills:validate:attribution": "uv run --with pyyaml skills/skill-creator/scripts/quick_validate.py skills/attribution",
