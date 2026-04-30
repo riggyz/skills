@@ -71,6 +71,16 @@ npm run configure:attribution -- --name "My Agent" --emoji "<emoji>"
 
 This writes `skills/attribution/references/attribution-config.md`, which is ignored by git.
 
+## Configure Brain
+
+The `brain` skill does not hardcode a vault name or path. Generate the local config before installing or syncing the skill:
+
+```sh
+npm run configure:brain -- --vault-name "my-vault" --vault-path "/absolute/path/to/vault"
+```
+
+This writes `skills/brain/references/brain-config.md`, which is ignored by git. Without it, the skill stops on first use and asks for configuration.
+
 ## Development
 
 Type-check TypeScript scripts:

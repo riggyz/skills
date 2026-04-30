@@ -5,7 +5,19 @@ description: Persistent cross-session memory in a configured Obsidian vault owne
 
 # Brain — Cross-Session Memory via Obsidian
 
-Your long-term memory lives in the configured Obsidian vault. Treat `<brain-vault-name>` and `<brain-vault-path>` as deployment-specific values that must be configured by the user or host environment. The vault is the handoff from prior-you to future-you.
+Your long-term memory lives in the configured Obsidian vault. The vault is the handoff from prior-you to future-you.
+
+## Configuration
+
+The vault name and path are deployment-specific. Read them from `references/brain-config.md` at the start of each session and substitute them wherever this skill or its guides reference `<brain-vault-name>` or `<brain-vault-path>`.
+
+If `references/brain-config.md` is missing, stop before doing any vault work and ask the user to run:
+
+```sh
+npx tsx scripts/configure-brain.ts --vault-name "vault-name" --vault-path "/absolute/path/to/vault"
+```
+
+After substitution, the rest of this skill and its `*/GUIDE.md` files apply unchanged.
 
 The primary purpose is project understanding: mental models, decisions, gotchas, conventions, links, screenshots, diagrams, external references, and enough context that a fresh agent can resume without re-discovery. Preferences, tool notes, and backlog items support that purpose.
 
