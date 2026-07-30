@@ -7,12 +7,16 @@
   "scripts": {
     "configure:attribution": "tsx skills/attribution/scripts/configure-attribution.ts",
     "configure:brain": "tsx skills/brain/scripts/configure-brain.ts",
+    "brain:audit": "tsx skills/brain/scripts/audit-vault.ts",
     "skills:list": "skills add . --list --full-depth",
     "skills:validate": "npm run skills:validate:attribution && npm run skills:validate:brain && npm run skills:validate:deep-dive && npm run skills:validate:skill-creator",
     "skills:validate:attribution": "uv run --with pyyaml skills/skill-creator/scripts/quick_validate.py skills/attribution",
     "skills:validate:brain": "uv run --with pyyaml skills/skill-creator/scripts/quick_validate.py skills/brain",
     "skills:validate:deep-dive": "uv run --with pyyaml skills/skill-creator/scripts/quick_validate.py skills/deep-dive",
     "skills:validate:skill-creator": "uv run --with pyyaml skills/skill-creator/scripts/quick_validate.py skills/skill-creator",
+    "test": "npm run test:brain && npm run test:skill-tooling",
+    "test:brain": "tsx --test skills/brain/scripts/*.test.ts",
+    "test:skill-tooling": "PYTHONDONTWRITEBYTECODE=1 uv run --with pyyaml python skills/skill-creator/scripts/quick_validate_test.py",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

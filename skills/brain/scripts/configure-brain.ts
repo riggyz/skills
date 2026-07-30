@@ -1,7 +1,14 @@
 #!/usr/bin/env -S npx tsx
 
-import { mkdirSync, writeFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
+import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 function valueFor(args: string[], flag: string): string | undefined {
@@ -14,7 +21,7 @@ function valueFor(args: string[], flag: string): string | undefined {
 
 function usage(): void {
   console.error(
-    'Usage: npx tsx skills/brain/scripts/configure-brain.ts --vault-name "vault-name" --vault-path "/absolute/path/to/vault"',
+    'Usage: npx tsx skills/brain/scripts/configure-brain.ts --vault-name "vault-name" --vault-path "/absolute/path/to/vault" [--primary-user-note "person-user.md"] [--graph-palette-note "tool-vault-graph.md"]',
   );
 }
 
@@ -22,31 +29,122 @@ function markdownInlineCode(value: string): string {
   return `\`${value.replaceAll("`", "\\`")}\``;
 }
 
-const args = process.argv.slice(2);
-const vaultName = valueFor(args, "--vault-name");
-const vaultPath = valueFor(args, "--vault-path");
-
-if (!vaultName || !vaultPath) {
-  usage();
-  process.exit(1);
+function validateVaultRelativeNote(value: string, flag: string): string {
+  if (isAbsolute(value) || value.split(/[\\/]/).includes("..")) {
+    throw new Error(`${flag} must be a vault-relative path without '..' segments`);
+  }
+  return value;
 }
 
-const scriptDir = dirname(fileURLToPath(import.meta.url));
-const configPath = resolve(scriptDir, "../references/brain-config.md");
+function requireExistingNote(vaultPath: string, value: string, flag: string): string {
+  const validated = validateVaultRelativeNote(value, flag);
+  if (!existsSync(join(vaultPath, validated))) {
+    throw new Error(`${flag} does not exist in the vault: ${validated}`);
+  }
+  return validated;
+}
 
-mkdirSync(dirname(configPath), { recursive: true });
-writeFileSync(
-  configPath,
-  [
+export function detectPrimaryUserNote(vaultPath: string): string | undefined {
+  const candidates = readdirSync(vaultPath)
+    .filter((name) => /^person-.*\.md$/.test(name))
+    .sort();
+  const index = readFileSync(join(vaultPath, "index.md"), "utf8");
+  const peopleStart = index.split(/\r?\n/).findIndex((line) => line.trim() === "## People");
+  if (peopleStart !== -1) {
+    const lines = index.split(/\r?\n/);
+    const peopleEnd = lines.findIndex(
+      (line, lineIndex) => lineIndex > peopleStart && /^##\s+/.test(line.trim()),
+    );
+    const peopleSection = lines
+      .slice(peopleStart + 1, peopleEnd === -1 ? undefined : peopleEnd)
+      .join("\n");
+    const indexedCandidates = [...peopleSection.matchAll(/\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|[^\]]+)?\]\]/g)]
+      .map((match) => match[1])
+      .filter((target) => !target.includes("/") && candidates.includes(`${target}.md`));
+    if (new Set(indexedCandidates).size === 1) return `${indexedCandidates[0]}.md`;
+  }
+  if (candidates.length === 1) return candidates[0];
+  if (candidates.length > 1) {
+    throw new Error(
+      `Multiple person notes found; pass --primary-user-note with one of: ${candidates.join(", ")}`,
+    );
+  }
+  return undefined;
+}
+
+export interface BrainConfigValues {
+  vaultName: string;
+  vaultPath: string;
+  primaryUserNote?: string;
+  graphPaletteNote?: string;
+}
+
+export function resolveBrainConfig(
+  vaultName: string,
+  vaultPath: string,
+  requestedPrimaryUserNote?: string,
+  requestedGraphPaletteNote?: string,
+): BrainConfigValues {
+  if (!isAbsolute(vaultPath)) throw new Error("--vault-path must be absolute");
+  if (!existsSync(vaultPath) || !statSync(vaultPath).isDirectory()) {
+    throw new Error(`Vault path is not an existing directory: ${vaultPath}`);
+  }
+  if (!existsSync(join(vaultPath, "index.md"))) {
+    throw new Error(`Vault is not initialized; index.md is missing from ${vaultPath}`);
+  }
+
+  const primaryUserNote = requestedPrimaryUserNote
+    ? requireExistingNote(vaultPath, requestedPrimaryUserNote, "--primary-user-note")
+    : detectPrimaryUserNote(vaultPath);
+  const graphPaletteNote = requestedGraphPaletteNote
+    ? requireExistingNote(vaultPath, requestedGraphPaletteNote, "--graph-palette-note")
+    : existsSync(join(vaultPath, "tool-vault-graph.md"))
+      ? "tool-vault-graph.md"
+      : undefined;
+  return { vaultName, vaultPath, primaryUserNote, graphPaletteNote };
+}
+
+export function renderBrainConfig(config: BrainConfigValues): string {
+  return [
     "# Brain Config",
     "",
-    `Vault name: ${markdownInlineCode(vaultName)}`,
-    `Vault path: ${markdownInlineCode(vaultPath)}`,
+    `Vault name: ${markdownInlineCode(config.vaultName)}`,
+    `Vault path: ${markdownInlineCode(config.vaultPath)}`,
+    `Primary user note: ${config.primaryUserNote ? markdownInlineCode(config.primaryUserNote) : "_(not configured)_"}`,
+    `Graph palette note: ${config.graphPaletteNote ? markdownInlineCode(config.graphPaletteNote) : "_(not configured)_"}`,
     "",
     "Generated by `scripts/configure-brain.ts`.",
     "",
-  ].join("\n"),
-  "utf8",
-);
+  ].join("\n");
+}
 
-console.log(`Wrote ${configPath}`);
+function main(): void {
+  const args = process.argv.slice(2);
+  const vaultName = valueFor(args, "--vault-name");
+  const vaultPath = valueFor(args, "--vault-path");
+  if (!vaultName || !vaultPath) {
+    usage();
+    process.exitCode = 1;
+    return;
+  }
+
+  try {
+    const config = resolveBrainConfig(
+      vaultName,
+      vaultPath,
+      valueFor(args, "--primary-user-note"),
+      valueFor(args, "--graph-palette-note"),
+    );
+    const scriptDir = dirname(fileURLToPath(import.meta.url));
+    const configPath = resolve(scriptDir, "../references/brain-config.md");
+    mkdirSync(dirname(configPath), { recursive: true });
+    writeFileSync(configPath, renderBrainConfig(config), "utf8");
+    console.log(`Wrote ${configPath}`);
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
+  }
+}
+
+const invokedPath = process.argv[1] ? resolve(process.argv[1]) : undefined;
+if (invokedPath === fileURLToPath(import.meta.url)) main();

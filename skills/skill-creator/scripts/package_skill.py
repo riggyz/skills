@@ -3,23 +3,32 @@
 Skill Packager - Creates a distributable .skill file of a skill folder
 
 Usage:
-    python utils/package_skill.py <path/to/skill-folder> [output-directory]
+    python scripts/package_skill.py <path-to-skill-folder> [output-directory]
 
 Example:
-    python utils/package_skill.py skills/public/my-skill
-    python utils/package_skill.py skills/public/my-skill ./dist
+    python scripts/package_skill.py skills/public/my-skill
+    python scripts/package_skill.py skills/public/my-skill ./dist
 """
 
 import fnmatch
 import sys
 import zipfile
 from pathlib import Path
-from scripts.quick_validate import validate_skill
+try:
+    from scripts.quick_validate import validate_skill
+except ModuleNotFoundError as error:
+    if error.name != "scripts":
+        raise
+    from quick_validate import validate_skill
 
 # Patterns to exclude when packaging skills.
 EXCLUDE_DIRS = {"__pycache__", "node_modules"}
 EXCLUDE_GLOBS = {"*.pyc"}
 EXCLUDE_FILES = {".DS_Store"}
+EXCLUDE_PRIVATE_CONFIGS = {
+    ("references", "attribution-config.md"),
+    ("references", "brain-config.md"),
+}
 # Directories excluded only at the skill root (not when nested deeper).
 ROOT_EXCLUDE_DIRS = {"evals"}
 
@@ -35,6 +44,8 @@ def should_exclude(rel_path: Path) -> bool:
         return True
     name = rel_path.name
     if name in EXCLUDE_FILES:
+        return True
+    if len(parts) >= 3 and tuple(parts[-2:]) in EXCLUDE_PRIVATE_CONFIGS:
         return True
     return any(fnmatch.fnmatch(name, pat) for pat in EXCLUDE_GLOBS)
 
@@ -69,7 +80,8 @@ def package_skill(skill_path, output_dir=None):
 
     # Run validation before packaging
     print("🔍 Validating skill...")
-    valid, message = validate_skill(skill_path)
+    validation = validate_skill(skill_path)
+    valid, message = validation[0], validation[1]
     if not valid:
         print(f"❌ Validation failed: {message}")
         print("   Please fix the validation errors before packaging.")
@@ -93,6 +105,9 @@ def package_skill(skill_path, output_dir=None):
             for file_path in skill_path.rglob('*'):
                 if not file_path.is_file():
                     continue
+                if file_path.resolve() == skill_filename.resolve():
+                    print(f"  Skipped output archive: {file_path.name}")
+                    continue
                 arcname = file_path.relative_to(skill_path.parent)
                 if should_exclude(arcname):
                     print(f"  Skipped: {arcname}")
@@ -110,10 +125,10 @@ def package_skill(skill_path, output_dir=None):
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python utils/package_skill.py <path/to/skill-folder> [output-directory]")
+        print("Usage: python scripts/package_skill.py <path/to/skill-folder> [output-directory]")
         print("\nExample:")
-        print("  python utils/package_skill.py skills/public/my-skill")
-        print("  python utils/package_skill.py skills/public/my-skill ./dist")
+        print("  python scripts/package_skill.py skills/public/my-skill")
+        print("  python scripts/package_skill.py skills/public/my-skill ./dist")
         sys.exit(1)
 
     skill_path = sys.argv[1]

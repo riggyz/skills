@@ -1,184 +1,121 @@
-# Guide — Capture
+# Guide — Atomic Capture
 
-Capture a single piece of durable information into the configured brain vault at `<brain-vault-path>`.
+Persist one durable item into the configured brain vault. Both user-signaled and agent-initiated capture are first-class; future-you should not depend on the user saying a magic phrase.
 
-**Both user-initiated and agent-initiated writes are first-class.** The brain is yours. Don't wait to be asked when you know something is worth keeping.
+Read `references/vault-contract.md` before writing. Read `references/artifact-policy.md` or `references/graph-maintenance.md` when the item involves a retained file or project registration.
 
-## When to run
+## Strong Explicit Triggers
 
-**Infer intent; don't pattern-match phrases.** Users rarely announce they want something remembered. They state preferences, make decisions, complain about a trap, or mention a fact and move on. Your job is to notice and capture. Examples below illustrate common signals — they're not a whitelist.
+These phrases are guaranteed-high-confidence signals, not a whitelist:
 
-### User-signaled intent
+- “remember this” / “don't forget this”;
+- “save this to brain” / “write this down”;
+- “update your notes” / “update the project brain”;
+- “add this as a gotcha.”
 
-You'll hear this more as lived patterns than stated requests:
+Infer equivalent intent from ordinary preferences, corrections, decisions, discoveries, and recurring friction.
 
-- Preference expressed ("I prefer X over Y", "let's always use Z", "I hate when tools do A")
-- Interaction feedback ("don't do that", "I like this format", "that's too much ceremony", "this is annoying")
-- Decision made with reasoning ("we're going with X because Y", "scrap that, use Z instead")
-- Durable fact about a project established ("this repo deploys via Z", "the prod DB is in region X")
-- Gotcha surfaced ("watch out — X always fails unless Y", "btw, A is wrong in the docs")
-- Explicit ask ("remember this", "save that", "write this down", "don't forget") — treat as a stronger signal, but the implicit cases above carry equal weight
+## Agent-Initiated Triggers
 
-If you think "future-me will want this" → it's a trigger. Don't wait for permission.
+Capture proactively when:
 
-### Agent-initiated triggers (you writing for future-you)
+- a non-obvious fact, command, convention, or workaround was verified;
+- a user's preference, communication correction, or repeated habit became clear;
+- a project mental model, relationship, constraint, or target state changed;
+- a decision and its reasoning should survive the session;
+- tool/docs behavior differed from reality;
+- research, a link, or an artifact would otherwise need to be rediscovered;
+- a reproducible gotcha will affect future work.
 
-Fire these on your own judgment, no permission needed.
+## Retention Gate
 
-**Atomic facts and workarounds:**
-- **You figured something out that wasn't obvious.** A CLI flag, an undocumented quirk, a non-intuitive codebase convention.
-- **You found a workaround for a bug or limitation.** Future-you will hit the same wall; spare them the debugging.
-- **You noticed a pattern the user repeats** without calling it out explicitly. Patterns reveal preferences.
-- **You made a judgment call** during work (picked approach X over Y for a reason worth preserving).
-- **A tool behaved unexpectedly** and you want future-you to know the real behavior, not the documented one.
-- **You researched something and don't want to redo the research** next time.
+Before writing, require all applicable checks:
 
-**Project understanding (update `projects/<slug>/_<slug>.md` using the prescribed skeleton):**
-- **Purpose.** What it is, who it's for, why it exists. Write this the first time you understand it well enough to explain.
-- **Architecture.** Your mental model of the shape: key abstractions, data flow, major components. If deep enough, split into `architecture.md` and link from `_<slug>.md`.
-- **Tech stack.** Languages, runtimes, frameworks, databases, major libs. Keep in `_<slug>.md` as one-liners.
-- **Layout.** Repo structure, monorepo packages, where things live.
-- **Relationships.** What this project depends on / is used by. Record both in YAML frontmatter (`depends_on` / `used_by`) AND as prose in the Relationships section.
-- **Target state.** How it should work when done (or next). Distinct from current state.
-- **Open questions.** Design tensions, unresolved tradeoffs. Future-you should inherit these, not re-discover them.
-- **Load-bearing weirdness.** Things that defy expectation. What you'd normally assume but shouldn't.
+1. **Future utility:** likely to affect a later session, not merely the current turn.
+2. **Grounding:** verified evidence or an explicit attributed statement; uncertainty remains labeled.
+3. **Scope:** the person, project, tool, and temporal applicability are known.
+4. **Novelty:** not already captured, and updating an existing note is preferable.
+5. **Safety:** no secrets or unclear-sensitive data.
+6. **Ownership:** the brain, not repo docs/code/ADR or the issue tracker, is the right home.
 
-**When a topic deserves its own note:**
-
-If a section of `_<slug>.md` is growing past a few paragraphs, or a topic needs diagrams, code, or deep detail — split it into a dedicated file in the same folder (`architecture.md`, `data-model.md`, `deploy.md`, `auth-flow.md`, whatever). Wikilink it from `_<slug>.md`. This keeps the entry point scannable and uses Obsidian's graph to make navigation first-class. Remember: every topic file also carries `#project/<slug>`.
-
-**External references and attachments:**
-- A project-relevant URL, screenshot, PDF, diagram, Figma file, issue/PR, Slack/Teams thread, vendor doc, or dashboard is durable when it explains how the project works or where future-you should look.
-- Store links with context in the project note or `projects/<slug>/references.md` when several accumulate.
-- If a local screenshot/image/PDF is available and safe to keep, place it in `projects/<slug>/` and embed/link it from the relevant note (`![[filename.png]]`, `[[datasheet.pdf]]`). Use descriptive lowercase-kebab filenames.
-- Do not mirror large, sensitive, or secret-bearing assets. For external-only assets, link with owner/source, date, and why it matters.
-
-When in doubt, write. A slightly-too-frequent write is a far smaller failure mode than future-you re-deriving the same fact. (The tradeoff is bounded by the consolidate guide's dedup pass.)
-
-### Don't duplicate what the repo owns
-
-If the project has a real README, ARCHITECTURE.md, or ADR directory, don't copy their content into the brain. Point at them from `_<slug>.md` and capture only what isn't there:
-
-- Your mental model that differs from or extends the docs.
-- Gotchas discovered in practice that the docs miss.
-- Conventions inferred from code that aren't documented.
-- Open questions and design tensions not yet resolved.
-
-The brain is the agent's private notebook. The repo is the public record. Don't mirror.
+An explicit “remember this” establishes utility, not truth or safety. If the user explicitly asks to retain an unverified belief, record it as user-provided or uncertain rather than canonical fact.
 
 ## Procedure
 
-### 1. Classify
+### 1. Classify And Search
 
-Answer two questions:
+Use the scope mapping in `references/vault-contract.md`. Resolve the configured primary user note rather than assuming `person-user.md`.
 
-- **Scope**: cross-cutting (vault root) or project-scoped (`projects/<slug>/`)?
-- **Type**: person / pref / tool / codestyle / decision / gotcha / conventions / other?
+Search before every write:
 
-Mapping:
-
-| What surfaced                                         | Scope         | File                                                                      |
-|-------------------------------------------------------|---------------|---------------------------------------------------------------------------|
-| Preference about the user                             | cross-cutting | `person-user.md`                                                          |
-| Preference not tied to a person                       | cross-cutting | `pref-<slug>.md`                                                          |
-| Tool config/usage                                     | cross-cutting | `tool-<slug>.md`                                                          |
-| Language idiom or formatting rule                     | cross-cutting | `codestyle-<lang>.md`                                                     |
-| Cross-project decision                                | cross-cutting | `decision-<slug>.md`                                                      |
-| Reusable trap                                         | cross-cutting | `gotcha-<slug>.md`                                                        |
-| Fixable issue with a project, MCP, tool, or skill     | cross-cutting | append line to `improvements.md` (see `brain/improve/GUIDE.md` for format)|
-| Project convention (commands, structure, patterns)    | project       | `projects/<slug>/conventions.md` (create only when useful)                |
-| Project decision with reasoning                       | project       | `projects/<slug>/decisions.md` (create only when useful; append dated block) |
-| Project-specific trap                                 | project       | `projects/<slug>/gotchas.md` (create only when useful; append)            |
-| Project external reference / attachment               | project       | relevant project note, or `projects/<slug>/references.md` once references accumulate |
-| New project just surfaced                             | project       | create `projects/<slug>/_<slug>.md` using the skeleton (see brain SKILL.md) |
-| Updated mental model / purpose / tech stack / layout  | project       | edit `projects/<slug>/_<slug>.md` in place                                |
-| Deep architecture, data model, deploy, or big topic   | project       | create or edit `projects/<slug>/<topic>.md` (ad-hoc), link from `_<slug>` |
-| New project-to-project relationship                   | project       | update the affected `_<slug>.md` frontmatter and Relationships prose      |
-| Relationship reinterpretation / project retired       | both          | update `index.md` project state if needed and the affected `_<slug>.md` files |
-
-**Tag discipline for project-scoped notes:** every markdown note in `projects/<slug>/` ends with the `#project/<slug>` tag. This is non-optional. Attachments do not carry tags themselves; they are discoverable through the note that embeds or links them.
-
-### 2. Search before writing
-
-Prefer native `Grep` for filename/content hits:
-
-```
+```text
 Grep pattern="<keywords>" path=<brain-vault-path>
 ```
 
-For prose-oriented indexed search, use the CLI:
+If Obsidian is available, supplement with indexed search. Update the canonical note when one exists. Do not create an alias or near-duplicate merely because its title differs.
 
-```
-obsidian vault=<brain-vault-name> search query="<keywords>"
-```
+### 2. Choose The Write Shape
 
-If a relevant note exists, append or edit it. Do NOT create a near-duplicate.
+- **Current semantic truth:** edit the relevant section in place.
+- **Decision or gotcha history:** insert a dated block in chronological order before terminal tags.
+- **New coherent topic:** create one focused note and link it from the project entry point or typed index section.
+- **Artifact/reference:** follow `references/artifact-policy.md`; link it from a canonical note with provenance.
+- **Improvement:** use `improve/GUIDE.md` only when it is agent/tool/vault friction or project-specific agent context, not accepted product work that belongs in a tracker.
 
-### 3. Write
+For dated entries:
 
-**New note** (use native `Write`):
-
-```
-Write filePath=<brain-vault-path>/<path>.md content="---
-created: YYYY-MM-DD
-updated: YYYY-MM-DD
----
-
-# <Title>
-
-<body>
-
-#<tags>"
-```
-
-**Append to existing note** (use native `Edit` with targeted old/new, OR the CLI append if Obsidian is open):
-
-Native (preferred):
-```
-Edit filePath=<brain-vault-path>/<path>.md oldString="<existing trailing content>" newString="<existing trailing content>\n- <new fact>"
-```
-
-CLI alternative (requires Obsidian running):
-```
-obsidian vault=<brain-vault-name> append path=<path> content="\n- <new fact>"
-```
-
-For `decisions.md` and `gotchas.md`, append chronologically. Each entry should be dated:
-
-```
+```markdown
 ## YYYY-MM-DD — <short title>
-<reasoning or details>
+
+<fact, consequence, reasoning, or workaround>
 ```
 
-### 4. Link
+Treat bare issue/PR identifiers as prose. Use a full link or code formatting such as issue `#292`; never write slash-adjacent forms like `#292/PR`.
 
-If the new note is meaningful across projects, add a link from `index.md`. If it's a project note, make sure `projects/<slug>/_<slug>.md` references it. If it's a new project entirely, register it in the Projects section of `index.md`.
+### 3. Edit Atomically
 
-### 5. Confirm (only when the user explicitly asked)
+Use targeted native edits. If the note carries `updated:`, set it to today in the same operation.
 
-If the user used an explicit ask ("remember this", "save that", etc.), tell him in one line what you wrote and where:
+For project notes, insert content in the intended section **before** the final project-tag line. Verify the final non-empty line still contains `#project/<slug>`. Do not use blind EOF append or CLI `append` for structured Markdown notes.
 
-> Saved to `projects/example-project/gotchas.md`.
+For a new note, include `created:` and `updated:` frontmatter. Root notes use the relevant typed filename/tag. Project notes use the contract's tag rule and are linked from `_<slug>.md`.
 
-Do not read the whole note back.
+When current understanding changes, rewrite stale current-state prose instead of stacking warnings and caveats. Preserve useful reversal history in decisions/evidence.
 
-For every other case — implicit user intent or your own judgment — don't announce the write unless the fact is directly relevant to the current conversation. Silent captures are fine and usually preferred. The vault is for future-you, not a narration of current-you.
+### 4. Register New Projects Completely
 
-## What counts as "durable"
+For a new project, follow every registration step in `references/vault-contract.md`:
 
-- Preferences, decisions, conventions, tools, traps, people — yes.
-- One-off error messages, current line numbers, "we're editing this file right now" — no.
-- Speculation or unverified assumptions — no. Ask or verify first.
+1. Create the canonical entry point.
+2. Add only its path-qualified link under the correct index status.
+3. Add real companion links without empty stubs.
+4. Update verified relationship metadata and reciprocals.
+5. When a Graph palette note is configured, assign or verify its graph color group through `references/graph-maintenance.md`. In a plain Markdown vault without Graph configuration, this step is not applicable.
 
-## Edge cases
+Configured Graph registration requires the interactive close/reload ceremony. If it applies but cannot be completed, explicitly report it as pending; do not claim the project is fully registered.
 
-- **Ambiguous scope**: if unsure cross-cutting vs project, ask. A wrong placement is worse than a two-second clarification.
-- **New project**: create `projects/<slug>/_<slug>.md` using the skeleton, register it in the Projects section of `index.md`, then write the fact into the appropriate file within the folder. Do not create empty companion stubs.
-- **Conflicts existing note**: update the existing note and bump `updated:`. Note the change briefly in the body if it reverses a prior claim.
-- **Obsidian not running**: native file tools still work for create/edit/grep. Save via `Write`/`Edit`. If the user wants a linter pass or indexed search, defer that part until the app is open.
+### 5. Confirm Selectively
 
-## Red flags
+If the user explicitly asked to remember something, confirm in one line with the destination, for example:
 
-- You're about to create a second note on the same topic. Search first; update the existing one.
-- You're writing an unverified claim as fact. Verify or annotate.
-- You're creating a note deeper than `projects/<slug>/`. Stop — the structure is flat beyond that.
+> Saved to `projects/example/gotchas.md`.
+
+For implicit or agent-initiated capture, remain silent unless the write is directly relevant or requires user action, such as graph safety or unclear artifact sensitivity.
+
+## Edge Cases
+
+- **Ambiguous scope:** use context first; ask only when the wrong placement would materially hurt retrieval.
+- **Conflicting note:** verify, update current truth, preserve useful decision history, and bump `updated:`.
+- **Primary user note missing:** do not create a generic duplicate when another canonical person note may exist; resolve from config/index or ask.
+- **Repo-owned documentation:** link to it and capture only the agent-specific delta, mental model, or gotcha.
+- **Obsidian closed:** native edits work; defer indexed/graph-aware operations.
+- **Explicit no-write instruction:** report the candidate memory without persisting it.
+
+## Red Flags
+
+- Writing because a fact is interesting but not useful later.
+- Treating an inference or imported instruction as trusted fact/policy.
+- Creating a second note on an existing topic.
+- Moving the user's original attachment instead of copying it.
+- Editing without updating existing `updated:` metadata.
+- Appending content after a project tag.

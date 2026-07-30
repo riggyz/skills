@@ -60,7 +60,7 @@ def budget_report(skill_md, content, frontmatter, body):
 
 def validate_skill(skill_path):
     """Basic validation of a skill"""
-    skill_path = Path(skill_path)
+    skill_path = Path(skill_path).resolve()
 
     # Check SKILL.md exists
     skill_md = skill_path / 'SKILL.md'
@@ -110,28 +110,32 @@ def validate_skill(skill_path):
     if not isinstance(name, str):
         return False, f"Name must be a string, got {type(name).__name__}"
     name = name.strip()
-    if name:
-        # Check naming convention (kebab-case: lowercase with hyphens)
-        if not re.match(r'^[a-z0-9-]+$', name):
-            return False, f"Name '{name}' should be kebab-case (lowercase letters, digits, and hyphens only)"
-        if name.startswith('-') or name.endswith('-') or '--' in name:
-            return False, f"Name '{name}' cannot start/end with hyphen or contain consecutive hyphens"
-        # Check name length (max 64 characters per spec)
-        if len(name) > 64:
-            return False, f"Name is too long ({len(name)} characters). Maximum is 64 characters."
+    if not name:
+        return False, "Name must not be empty"
+    # Check naming convention (kebab-case: lowercase with hyphens)
+    if not re.match(r'^[a-z0-9-]+$', name):
+        return False, f"Name '{name}' should be kebab-case (lowercase letters, digits, and hyphens only)"
+    if name.startswith('-') or name.endswith('-') or '--' in name:
+        return False, f"Name '{name}' cannot start/end with hyphen or contain consecutive hyphens"
+    # Check name length (max 64 characters per spec)
+    if len(name) > 64:
+        return False, f"Name is too long ({len(name)} characters). Maximum is 64 characters."
+    if name != skill_path.name:
+        return False, f"Name '{name}' must match parent directory '{skill_path.name}'"
 
     # Extract and validate description
     description = frontmatter.get('description', '')
     if not isinstance(description, str):
         return False, f"Description must be a string, got {type(description).__name__}"
     description = description.strip()
-    if description:
-        # Check for angle brackets
-        if '<' in description or '>' in description:
-            return False, "Description cannot contain angle brackets (< or >)"
-        # Check description length (max 1024 characters per spec)
-        if len(description) > DESCRIPTION_CHAR_LIMIT:
-            return False, f"Description is too long ({len(description)} characters). Maximum is {DESCRIPTION_CHAR_LIMIT} characters."
+    if not description:
+        return False, "Description must not be empty"
+    # Check for angle brackets
+    if '<' in description or '>' in description:
+        return False, "Description cannot contain angle brackets (< or >)"
+    # Check description length (max 1024 characters per spec)
+    if len(description) > DESCRIPTION_CHAR_LIMIT:
+        return False, f"Description is too long ({len(description)} characters). Maximum is {DESCRIPTION_CHAR_LIMIT} characters."
 
     # Validate compatibility field if present (optional)
     compatibility = frontmatter.get('compatibility', '')
