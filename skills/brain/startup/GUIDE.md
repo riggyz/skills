@@ -1,149 +1,115 @@
 # Guide — Session Startup
 
-Orient using the configured Obsidian brain vault before doing real work. Treat `<brain-vault-name>` and `<brain-vault-path>` as deployment-specific values.
+Orient from the configured brain vault before substantive work. Startup is read-only; writes belong to capture, extraction, or maintenance.
 
-This is for your benefit, not the user's. You are reading your own notes from prior sessions so current-you doesn't start from zero. The vault exists because instances of you don't share memory natively; this is the workaround.
+## Rules
 
-## Rules of engagement
-
-- **Run on turn 1 of every session, unconditionally.** Not just when the user asks a "real" task. Meta-questions count. Casual greetings count. The orientation happens first, regardless.
-- **Run silently by default.** Do not announce routine orientation. Exception: if the user's first turn is explicitly about the brain, memory, vault structure, or skill behavior, orientation still happens first, but discussing what you read and how the system works is allowed.
-- **Never ask permission.** Do not say "want me to run the startup procedure?" The answer is always yes; asking wastes a turn and signals you weren't going to do your job automatically. Just do it.
-- **Orientation is not a deliverable.** The user doesn't need to see the results of orientation. They need your subsequent answers to reflect that you did it.
-
-## When to run
-
-1. **Turn 1 of every session.** Unconditional. Happens before your first response.
-2. The first time the user names a specific project, person, or tool in a session that you haven't already oriented on.
-3. After a long context compaction, as a refresh.
-
-## How the user typically signals a project
-
-The user may not say "let's work on project X." They may just open the agent while `cd`'d into the project directory. **Detect the project from the environment, don't wait to be told.**
+- Run on turn 1 of every session, after compaction, and when the active project/person/tool changes.
+- Run silently unless the user's task is explicitly about memory behavior.
+- Never ask permission to orient. Ask only when project identity is genuinely ambiguous.
+- Load a bounded orientation surface, not the whole vault.
 
 ## Procedure
 
-### 1. Load the index
+### 1. Load Configuration And Index
 
-```
-Read filePath=<brain-vault-path>/index.md
-```
+Read `references/brain-config.md`, then:
 
-`index.md` is the vault TOC and curated project list/state. Read it every session so you have the current project landscape in mind before you dive in. Do not dump it back to the user; this is internal orientation.
-
-### 2. Auto-detect the project from the environment
-
-At session start, the system prompt includes a `<env>` block with:
-
-- `Working directory: <path>`
-- `Is directory a git repo: yes|no`
-
-Derive the project slug:
-
-1. If the repo flag is `yes`, run `git rev-parse --show-toplevel` and take the `basename` of the result. Else, take the `basename` of the working directory.
-2. **Normalize to kebab-case:** lowercase everything, replace any run of non-alphanumerics with a single `-`, strip leading/trailing `-`.
-   - `my.project.core` -> `my-project-core`
-   - `MyProject` → `my-project`
-   - `api_server` → `api-server`
-   - `some-repo` → `some-repo`
-3. **Sanity-check the slug.** Skip project orientation if the normalized slug matches any of:
-    - A home-dir marker: `users`, a username, or a home-directory basename
-   - A generic parent: `-src`, `src`, `code`, `projects`, `repos`, `work`, `tmp`, `desktop`, `documents` (match after normalization)
-   - Any path that looks like it's not actually inside a real project
-
-If the slug is valid, check for `projects/<slug>/` in the vault. Use `Glob` to keep it quick:
-
-```
-Glob pattern="projects/<slug>/*.md" path=<brain-vault-path>
+```text
+Read <brain-vault-path>/index.md
 ```
 
-If the folder exists, go to step 3 and load its contents. If it doesn't, note that this is a project you haven't written about yet — plan to create `projects/<slug>/_<slug>.md` as soon as durable facts emerge.
+`index.md` is a link-only router. Use it to understand available root notes and project statuses. Do not recite it to the user.
 
-### 3. Orient to the active project
+If the index contains project summaries or other large prose, continue the current task but treat that as consolidation debt; detailed project context still comes from the project entry point.
 
-Whether detected automatically or named by the user, read the entry point first:
+### 2. Load The Primary User Note
 
+Read `Primary user note` from the config when it exists. This is how stored preferences affect current behavior.
+
+For older configs without that field:
+
+1. Resolve root `person-*` links in `index.md`'s `## People` section. If exactly one resolves, read it as the canonical person note even if stale unindexed person files also exist.
+2. Otherwise, if exactly one root `person-*.md` note exists, read it.
+3. If several indexed candidates remain, do not prefer a generic `person-user.md` merely because of its name. Load only a task-relevant person note and ask the user to re-run configuration with `--primary-user-note` before a primary-user write.
+4. If none exist, continue without a user note and configure/create one only when durable user context warrants it.
+
+Keep the primary user note compact enough for startup. Move large background/reference material into linked topic notes when it grows beyond a useful preference/profile card.
+
+### 3. Resolve The Active Project
+
+Prefer project identity in this order:
+
+1. A repository/workspace name or path explicitly provided in the task.
+2. A path to a file being discussed.
+3. The Git root of the current working directory (`git rev-parse --show-toplevel`).
+4. The current working-directory basename when not in Git.
+
+Normalize the chosen basename using `references/vault-contract.md`: split lower/digit-to-uppercase boundaries, lowercase, replace non-alphanumeric runs with `-`, and strip edges.
+
+Do not use these generic container names as project slugs:
+
+`src`, `source`, `code`, `projects`, `repos`, `workspace`, `workspaces`, `work`, `tmp`, `desktop`, `documents`, a username, or a home-directory basename.
+
+If resolution lands on a generic parent **and the task is project-specific**, do not silently proceed without project memory. First use any explicit path/name in the request; if identity remains ambiguous, briefly say the current directory does not identify the project and ask for its repository path or name. This asks for identity, not permission to run startup.
+
+For a non-project task, silently stop project orientation after the index and primary user note.
+
+### 4. Load The Project Entry Point
+
+Check for:
+
+```text
+<brain-vault-path>/projects/<slug>/_<slug>.md
 ```
-Read filePath=<brain-vault-path>/projects/<slug>/_<slug>.md
-```
 
-`_<slug>.md` is the project's entry-point note — a living TOC + mental model. It has a YAML frontmatter block (kind, stack, depends_on, used_by, status) and structured body sections. Read it first and treat it as the handoff from prior-you.
+If it exists, read only that entry point by default. It is the living project mental model and companion-note router.
 
-Then read useful companion files if they exist. `conventions.md` and `gotchas.md` are high-value defaults, but project companion files are optional; missing files are not a problem.
+Do **not** automatically read full `conventions.md`, `gotchas.md`, `decisions.md`, or every companion. Load a companion when the task, entry-point links, or targeted search makes it relevant. Large gotcha/decision histories should be searched, not injected wholesale.
 
-```
-Read filePath=<brain-vault-path>/projects/<slug>/conventions.md
-Read filePath=<brain-vault-path>/projects/<slug>/gotchas.md
-```
+If the task touches a dependency boundary, consider reading the depended-on project's entry point. If the task names a different project or commands run in another repo, re-orient before making project claims or writing memory.
 
-Read `decisions.md` only if it exists and the task suggests decision history matters.
+If the project folder does not exist, note internally that this is an unknown project. Do not create it during startup; register it through capture or `deep-dive` once durable facts are established.
 
-**Ad-hoc topic files:** `_<slug>.md` will have a "Companion notes in this folder" section wikilinking to any ad-hoc topic notes (`architecture.md`, `data-model.md`, etc.). Load the ones relevant to the current task. For a quick scan of everything the folder contains:
+### 5. Targeted Recall
 
-```
-Glob pattern="*.md" path=<brain-vault-path>/projects/<slug>
-```
+Use filename/content search for the task's actual concepts:
 
-**Depended-on projects:** if `_<slug>.md` frontmatter lists `depends_on`, and the task touches the boundary (API, shared types, deploy), consider loading the dependency's `_<other-slug>.md` too so you understand both sides.
-
-**Cross-referenced notes at root:** every project-scoped note carries `#project/<slug>`. If the task might touch cross-cutting concerns that reference this project, scan the tag:
-
-```
-obsidian vault=<brain-vault-name> search query="tag:#project/<slug>"
-```
-
-That surfaces root-level notes (e.g., a `decision-<slug>.md` or a `tool-<slug>.md`) that live outside the project folder but still concern it.
-
-If the task suggests your mental model has drifted or evolved, plan to update `_<slug>.md` in place.
-
-Missing files are fine — note which exist.
-
-If the user names a **different** project mid-session, or a person / tool, orient to that topic:
-
-- Person: load the relevant `person-*.md` at the vault root.
-- Tool: load the relevant `tool-*.md` at the vault root.
-
-If a user's task mentions a different project than the initial cwd, or you run commands in a different repo root, re-orient to that project before making claims about it.
-
-### 4. Targeted search for anything else
-
-For casual grep over filenames or content:
-
-```
+```text
 Grep pattern="<term>" path=<brain-vault-path>
 ```
 
-For Obsidian's indexed search (better for prose, respects frontmatter):
+When Obsidian is running, indexed search can surface root notes and project-tagged context:
 
-```
+```sh
 obsidian vault=<brain-vault-name> search query="<term>"
+obsidian vault=<brain-vault-name> search query="tag:#project/<slug>"
 ```
 
-Read only the notes that directly match. Do not pre-load speculatively.
+Read only direct matches. Root `tool-*`, `gotcha-*`, `decision-*`, and `codestyle-*` notes are useful when the task names or clearly implicates them; they are not default startup payload.
 
-### 5. Summarize silently
+### 6. Evaluate Freshness Silently
 
-Hold in mind: what is known, what is not, what contradictions (if any) exist with the current task. Do not narrate this to the user unless they ask. If they didn't ask about orientation, don't bring it up — just answer their actual question with the orientation internalized.
+Hold in mind:
 
-### 6. Flag gaps
+- what memory establishes;
+- what remains unknown;
+- whether the current repo/source contradicts the note;
+- whether verification metadata or the note's size suggests a refresh.
 
-If the task references a project (detected or named) and there is no `projects/<slug>/` folder, plan to create it (see the remember guide) as soon as you learn durable facts about it.
+`updated:` is an edit date, not a truth guarantee. Prefer fresh repository evidence for implementation, current user statements for intent, and dated authoritative sources for external facts.
 
-## Failure modes to avoid
+## Failure Handling
 
-- **Do not dump the entire vault** into context. Load only what's relevant.
-- **Do not skip orientation** "just this once" because the task seems simple.
-- **Do not treat stale notes as authoritative.** Check `updated:` in frontmatter; if a note is months old and the codebase has moved, prefer fresh evidence from the repo.
-- **Do not write during startup.** This phase is read-only. Writes belong in the remember or extract guides.
+- If Obsidian is closed, native reads/searches still work. Defer CLI-only checks.
+- If config or index is missing, stop vault work and report the exact missing path.
+- If an entry point is stale, do not silently trust it; verify during the task and update through capture/extraction.
+- If orientation would load thousands of lines, use targeted search and log the oversized startup surface for maintenance.
 
-## If Obsidian is not running
+## Red Flags
 
-Native file tools still work — Read/Grep/Glob don't need Obsidian. Only the indexed-search / orphans / backlinks operations require the app. Fall back to `Grep` + `Read` for orientation; defer anything that needs the live app until Obsidian is reopened.
-
-## Red flags
-
-- You started editing code or answering a substantive question without reading `index.md` first. Stop, orient, then continue.
-- You're about to assert a fact about "how this project works" without having consulted `projects/<slug>/`. Check first.
-- **You asked the user "should I load the brain / run startup?"** You should not have asked. Do it, don't ask.
-- **You recited the skill's trigger list back to the user** as your way of "loading" the skill. That's quoting the skill, not using it. Orient silently and answer the question.
-- **You treated the user's question as "not real work" and skipped orientation.** Every turn 1 gets orientation, including meta questions about the skill system itself.
+- Substantive work started before index and primary-user orientation.
+- A project claim is being made without checking its entry point.
+- The whole project folder or vault is being loaded “just in case.”
+- A generic parent directory was silently treated as a real project.
+- Startup created or edited memory; startup is read-only.

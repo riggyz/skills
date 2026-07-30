@@ -24,11 +24,17 @@ Validate all skills and print size/token budget estimates:
 npm run skills:validate
 ```
 
+Run deterministic tests:
+
+```sh
+npm test
+```
+
 ## Skills
 
 - `attribution` — configurable attribution rules for GitHub, Linear, Azure DevOps, and similar systems.
-- `brain` — persistent cross-session memory workflow backed by an Obsidian vault.
-- `deep-dive` — exhaustive project onboarding workflow that writes durable notes into the brain vault.
+- `brain` — agent-owned cross-session memory, targeted recall, proactive capture, checkpointing, artifacts, and vault maintenance backed by an Obsidian vault.
+- `deep-dive` — substantial project onboarding/refresh workflow that writes an evidence-backed mental model into the brain vault.
 - `skill-creator` — Anthropic's Apache-2.0 skill for creating, reviewing, evaluating, and improving Agent Skills.
 
 ## Third-Party Skills
@@ -55,6 +61,14 @@ Install a single skill globally:
 npx skills add . --global --skill brain --full-depth
 ```
 
+Install the memory pair specifically for OpenCode:
+
+```sh
+npx skills add . --global --agent opencode --skill brain deep-dive --full-depth --yes
+```
+
+The Skills CLI uses the universal global store at `~/.agents/skills/` for OpenCode and other compatible agents. OpenCode scans that location automatically; an explicit `--agent opencode` install makes the intended consumer unambiguous. Quit and restart OpenCode after installing or updating skills; running sessions keep the skill content they loaded at startup.
+
 Install into the current project instead of globally by omitting `--global`:
 
 ```sh
@@ -79,7 +93,35 @@ The `brain` skill does not hardcode a vault name or path. Generate the local con
 npm run configure:brain -- --vault-name "my-vault" --vault-path "/absolute/path/to/vault"
 ```
 
-This writes `skills/brain/references/brain-config.md`, which is ignored by git. Without it, the skill stops on first use and asks for configuration.
+Optional overrides:
+
+```sh
+npm run configure:brain -- \
+  --vault-name "my-vault" \
+  --vault-path "/absolute/path/to/vault" \
+  --primary-user-note "person-user.md" \
+  --graph-palette-note "tool-vault-graph.md"
+```
+
+Without overrides, configuration detects a sole canonical `person-*` link/note and `tool-vault-graph.md` when present. If several person notes remain ambiguous after consulting `index.md`'s People section, configuration stops and requires `--primary-user-note` rather than guessing. It also requires an initialized vault with `index.md`. This writes `skills/brain/references/brain-config.md`, which is ignored by git. Without it, the skill stops on first use and asks for configuration.
+
+To make turn-one brain loading deterministic in OpenCode, merge the short bootstrap from `skills/brain/references/host-bootstrap.md` into `~/.config/opencode/AGENTS.md`. Keep the full workflow in the skill rather than duplicating it in global instructions.
+
+## Audit Brain Vault
+
+Run the read-only vault doctor against the configured vault:
+
+```sh
+npm run brain:audit
+```
+
+Or pass another vault explicitly:
+
+```sh
+npm run brain:audit -- --vault-path "/absolute/path/to/vault" --strict
+```
+
+The doctor checks typed/root and project index coverage, canonical graph groups and query overlap, palette RGB conversion, project tags, companion links, relationship reciprocity, startup note sizes, phantom issue tags, and backlog pressure. It never edits the vault.
 
 ## Development
 
@@ -88,6 +130,14 @@ Type-check TypeScript scripts:
 ```sh
 npm run typecheck
 ```
+
+Run the brain doctor fixture tests:
+
+```sh
+npm run test:brain
+```
+
+Behavior-level prompts live in `skills/brain/evals/evals.json`. `npm test` validates their coverage; execute comparative model runs through the `skill-creator` workflow described in `skills/brain/evals/README.md`.
 
 Validate one skill:
 
@@ -137,3 +187,5 @@ When editing a vendored skill:
 - Prefer small patches over rewriting upstream content.
 
 Generated local config files, like attribution identity, should stay ignored by git.
+
+The `.skill` packager excludes generated attribution/brain configuration files so distributable archives cannot leak local identity or vault paths. Direct local installs from this repository intentionally use the configured source tree.

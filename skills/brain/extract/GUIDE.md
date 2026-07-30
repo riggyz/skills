@@ -1,130 +1,96 @@
-# Guide — End-of-Session Extraction
+# Guide — Checkpoint Extraction
 
-Sweep the session for information worth keeping and write it to the configured brain vault at `<brain-vault-path>`.
+Sweep accumulated session context for durable information that atomic capture missed. Extraction is periodic gardening, not a substitute for proactive capture.
 
-This is the periodic gardening pass. It is distinct from the remember guide, which captures a single fact on explicit trigger. Extract looks back over the whole session.
+Read `references/vault-contract.md` and use `remember/GUIDE.md` semantics for every individual write.
 
-## When to run
+## Strong Explicit Triggers
 
-Infer from context, not specific phrases. Examples of signals:
+- “extract what we learned”;
+- “checkpoint this session to the brain”;
+- “capture this before we stop” / “wrap this up”;
+- “extract before compaction.”
 
-- The user indicates the session is wrapping up (explicit "we're done", "good stopping point", or implicit — he closes a task, thanks you, says goodbye, switches topic to something unrelated).
-- A meaningful milestone landed (feature completed, bug root-caused, design decision made).
-- A user-acknowledged checkpoint happened ("looks good", "commit this", "next step") after a multi-step stretch.
-- A known compaction or context reset is about to happen.
-- Material in any extraction category has accumulated this session and you're approaching end-of-turn without capturing it.
+These are high-confidence examples, not a whitelist.
 
-If you're unsure whether a session is "ending," err on extracting — partial extraction is better than missing the window entirely.
+## When To Run
 
-## What to extract
+- A meaningful feature, investigation, fix, or design milestone completed.
+- The user acknowledges a checkpoint after substantial work.
+- The session is wrapping up or switching to an unrelated topic.
+- Compaction/context reset is imminent.
+- A long multi-step stretch accumulated uncaptured decisions, references, or model changes.
 
-Scan the session for:
+Do not run a noisy full sweep after every minor turn. Atomic capture handles facts at the moment they become clear.
 
-1. **Decisions made** — architectural choices, tool selections, strategy pivots. Include reasoning.
-2. **Conventions discovered** — "this project always does X", repo patterns, build/test/deploy commands.
-3. **Gotchas encountered** — traps, footguns, "tried X, doesn't work because Y".
-4. **Preferences expressed** — the user's stated preferences about code, workflow, communication, agent behavior, or recurring frustrations.
-5. **Tools configured** — new CLIs, env setup, auth patterns that aren't obvious.
-6. **People mentioned** — teammates, their roles, and how they interact with the user.
-7. **External references** — links, screenshots, diagrams, PDFs, issues/PRs, docs, dashboards, or chat threads used as project evidence.
-8. **Outcomes** — what was completed, what remains open.
+## What To Extract
 
-Do NOT extract:
+- decisions and reasoning;
+- verified conventions, commands, and tool behavior;
+- gotchas, failed approaches, and workarounds;
+- user preferences, corrections, communication style, and workflow habits;
+- changed project purpose, architecture, relationships, target state, or open questions;
+- meaningful outcomes and remaining context future-you needs;
+- external references and safe artifacts used as evidence;
+- uncaptured agent/tool/vault friction suitable for `improve/GUIDE.md`.
 
-- Transient state (current file, cursor position, specific line numbers).
-- Chat small talk.
-- Speculation or unverified guesses. If uncertain, skip it or annotate as uncertain.
-- Full transcripts or long quotes. Capture the fact, not the conversation.
+Skip transient state, raw transcripts, routine file lists, line numbers likely to drift, secrets, speculation, and facts already represented canonically.
 
 ## Procedure
 
-### 1. Categorize
+### 1. Review And Classify
 
-Walk the session. For each extractable item, decide:
+Walk the session once. For each candidate, apply the retention gate from `remember/GUIDE.md` and choose its canonical target from `references/vault-contract.md`.
 
-- **Scope**: cross-cutting (vault root) or project-scoped?
-- **Type**: decision / convention / gotcha / preference / tool / person / other?
-- **Target file**: use the mapping from the remember guide.
+Run an explicit person checkpoint: did the user express a preference, correction, working style, recurring frustration, or durable personal context? If yes, update the configured primary user note or an appropriate linked personal note.
 
-### 2. Dedupe against the vault
+### 2. Dedupe
 
-Prefer native `Grep`:
+Search the vault before writing. If the item is already present and current, skip it. If partially present, edit the existing note. If atomic capture already wrote it this session, do not write it again.
 
-```
-Grep pattern="<keywords>" path=<brain-vault-path>
-```
+### 3. Batch Targeted Writes
 
-For prose search, use the CLI:
+Group changes by target file to avoid repeated reads, but preserve narrow, reviewable edits:
 
-```
-obsidian vault=<brain-vault-name> search query="<keywords>"
-```
+- current project model -> rewrite relevant sections in `_<slug>.md`;
+- dated decision/gotcha -> insert a dated block before terminal tags;
+- conventions -> merge into the existing canonical section;
+- deep topic -> create/update one focused companion and link it;
+- person/tool/root knowledge -> update the configured typed root note;
+- references/artifacts -> follow `references/artifact-policy.md`;
+- relationships -> update verified `depends_on`, reciprocal `used_by`, and prose;
+- improvements -> use `improve/GUIDE.md` without duplicating project tracker work.
 
-If already recorded, skip it. If partially recorded, plan to update the existing note.
+Every edited Markdown note carrying `updated:` gets today's date. Every edited project note retains its final project-tag line. Format issue/PR identifiers according to the vault contract.
 
-### 3. Write in one pass
+If the project materially changed, remove obsolete current-state claims. Preserve useful historical rationale in decisions/evidence rather than leaving contradictory body sections.
 
-Use native `Write` / `Edit`. Batch by target file to avoid re-reading:
+### 4. Register New Projects
 
-- Project decisions → append dated block to `projects/<slug>/decisions.md`
-- Project gotchas → append to `projects/<slug>/gotchas.md`
-- Project conventions → update `projects/<slug>/conventions.md` (edit in place; do not append duplicates)
-- Project mental model changes → edit `projects/<slug>/_<slug>.md` in place (Purpose/Architecture/Tech stack/Layout/Target state/Open questions sections)
-- Deep topics that deserve their own note → create `projects/<slug>/<topic>.md` and link from `_<slug>.md`
-- Project links/screenshots/external references → add to the relevant project note, or create/update `projects/<slug>/references.md` when several references accumulate
-- **New or changed project-to-project relationships** → update the `depends_on` / `used_by` frontmatter in each affected `_<slug>.md` and keep the prose Relationships sections accurate
-- Cross-cutting → create or update the appropriate root note (`person-*`, `tool-*`, etc.)
+If extraction establishes a new project, complete the full registration checklist in `references/vault-contract.md`, including graph assignment when the vault configures it. If an applicable graph ceremony cannot run, report that one pending step.
 
-Every project-scoped note you create or edit in this pass must end with `#project/<slug>`. If a note is missing the tag, add it.
+### 5. Check Backlog Pressure
 
-Before writing, run a person-note checkpoint: did the user express a preference, correction, communication style, workflow habit, or repeated frustration? If yes, update `person-user.md`; do not wait for explicit "remember this" phrasing.
+If the relevant brain backlog is visibly oversized, duplicated, or stale, mention that maintenance is warranted. Do not derail the current checkpoint into an unrequested improvement pass.
 
-If a project materially changed, prefer an overwrite-in-place pass across existing notes to appending caveats. Keep what is still true, remove stale claims, and mark reversals when useful.
+### 6. Report Briefly
 
-If the total open backlog across root + relevant project files is roughly over 10 items, surface that the brain backlog is growing and ask whether the user wants an improvement pass.
+Report only useful changes and required follow-up in a few lines. If the user explicitly requested extraction, list destinations. For an implicit checkpoint, silent capture is acceptable unless graph/artifact action needs them.
 
-Append format for dated logs:
+If nothing met the retention gate, a no-op is correct; do not manufacture memory to justify the workflow.
 
-```
-## YYYY-MM-DD — <short title>
-<body>
-```
+## Quality Bar
 
-### 4. Link new notes
+- Fact over transcript.
+- Current model over layered caveats.
+- Specific evidence over generic summary.
+- Source/date for mutable external claims.
+- One canonical write over repeated mentions.
 
-If any new note should be discoverable from an index:
+## Red Flags
 
-- New cross-cutting topic → add a link from `index.md`.
-- New project → ensure `projects/<slug>/_<slug>.md` exists and register the project in the Projects section of `index.md`.
-
-### 5. Report briefly
-
-Tell the user what was extracted and where, in at most a few lines. Example:
-
-> Extracted to the brain:
-> - `projects/example-project/decisions.md` — chose a new storage backend (reasoning included)
-> - `projects/example-project/gotchas.md` — `test` hangs when stdin is a TTY
-> - `person-user.md` — prefers one task runner over another
-
-Do not read notes back in full.
-
-## Quality bar
-
-- **Fact, not narrative.** "Chose X because Y" beats "We spent an hour debating X vs Y and eventually settled on X".
-- **Specific, not generic.** "Deploy runs `example deploy --env prod` from `ops/` directory" beats "There is a deploy process".
-- **Verified, not assumed.** Only record what was actually established in the session.
-- **Dated.** Especially for decisions and gotchas — future-you needs to know when a claim was valid.
-
-## Edge cases
-
-- **Nothing durable came up**: say so in one line and skip writing. Not every session produces vault content.
-- **Contradicts an existing note**: update the existing note, bump `updated:`, briefly note the reversal.
-- **New project with no folder**: create `projects/<slug>/_<slug>.md` using the skeleton, register the project in `index.md`, then write the extracted facts into the right files within the folder.
-- **Screenshot/link with unclear sensitivity**: ask before saving or mirroring it. Linking with context is safer than copying sensitive assets into the vault.
-- **Obsidian not running**: proceed with native `Write`/`Edit`. Skip CLI-only steps (indexed search, backlinks).
-
-## Red flags
-
-- You're about to create a note that duplicates an existing one. Search first.
-- You're extracting everything. Be selective — landfill is the failure mode.
-- You're writing unverified claims. If the user hasn't confirmed or you haven't verified, either check or don't write.
+- Extracting everything because the session was long.
+- Reporting a graph registration that did not complete its reload ceremony.
+- Duplicating atomic captures.
+- Leaving stale current-state prose beside a new warning.
+- Updating content without updating existing `updated:` metadata.
