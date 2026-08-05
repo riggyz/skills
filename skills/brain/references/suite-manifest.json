@@ -1,0 +1,15 @@
+{
+  "suiteVersion": 2,
+  "contractVersion": 2,
+  "foundation": "brain",
+  "skills": [
+    "brain",
+    "brain-contextualize",
+    "brain-recall",
+    "brain-remember",
+    "brain-consolidate",
+    "brain-synthesize",
+    "brain-build"
+  ],
+  "configPath": "${XDG_CONFIG_HOME:-$HOME/.config}/agent-brain/config.json"
+}

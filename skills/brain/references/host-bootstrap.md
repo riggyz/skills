@@ -1,6 +1,6 @@
 # Host Bootstrap
 
-Agent Skill descriptions are model-selected metadata. They strongly encourage activation but cannot, by themselves, guarantee lifecycle timing such as turn-one orientation or pre-compaction checkpointing. Put only the tiny always-on bootstrap in the host's global instruction layer; keep learned memory in the vault and procedures in this skill.
+Agent Skill descriptions are model-selected metadata. They cannot guarantee lifecycle timing. Put only the tiny always-on bootstrap in the host instruction layer; keep learned memory in the vault and procedures in the suite.
 
 ## OpenCode
 
@@ -15,10 +15,10 @@ Merge this instruction into the existing file; do not overwrite unrelated global
 ```markdown
 ## Brain memory
 
-At turn 1 of every session and after context compaction, load the `brain` skill before substantive work. Use it throughout work for proactive durable capture, targeted recall, and milestone checkpointing; the user should not have to manage memory curation.
+At turn 1 of every session and after context compaction, run `brain-contextualize` before substantive work; it loads the `brain` foundation itself as a precondition. Do not instruct loading `brain` directly — turn-one entry belongs to `brain-contextualize` alone. From there, use `brain-recall` for targeted retrieval, `brain-remember` proactively for durable capture and checkpoints, `brain-consolidate` for structural maintenance, `brain-synthesize` for cross-owner pattern promotion, and `brain-build` for substantial durable onboarding. Do not load every operator at startup; the user should not have to manage memory curation.
 ```
 
-OpenCode loads configuration-time files once. Quit and restart OpenCode after installing or updating the skill or global `AGENTS.md`; the current session retains its already-loaded skill content.
+OpenCode loads configuration-time files once. Quit and restart OpenCode after installing/updating the suite or global `AGENTS.md`; the current session retains already-loaded content.
 
 ## Claude Code
 

@@ -4,19 +4,20 @@ Use this procedure for every `.obsidian/graph.json` read-modify-write. Obsidian 
 
 ## Resolve The Palette
 
-Read `Graph palette note` from `references/brain-config.md`. A present `_(not configured)_` field explicitly disables project coloring. For a legacy config that lacks the field entirely, use `tool-vault-graph.md` only when it exists at the vault root; then update the config at the next setup pass. If no palette is configured or discoverable, Graph project coloring is not enabled for that vault. Configure a palette before registration rather than inventing an ad hoc color.
+Read `graph.paletteNode` from `${XDG_CONFIG_HOME:-$HOME/.config}/agent-brain/config.json`. A missing/null value disables managed graph coloring. Configure a palette before registration rather than inventing an ad hoc color. `brain-consolidate` owns graph reconciliation; `brain-build` may request registration for a newly built project/workspace node.
 
-Each palette assignment should name the exact project slug or include an explicit `Members:` list of slugs. Human-only family labels such as “UI and connectors” cannot be audited reliably.
+Each palette assignment should name the exact project/workspace slug or include an explicit `Members:` list. Human-only family labels cannot be audited reliably.
 
-The canonical project query is:
+Canonical managed queries are:
 
 ```text
 path:projects/<slug>/
+path:workspaces/<slug>/
 ```
 
 The trailing slash is required. Without it, `path:projects/foo` can also match sibling folders such as `foo-api`.
 
-Each immediate project folder gets exactly one color-group object. Related projects may share a color, but do not combine paths with `or`; Obsidian's Graph query parser does not reliably honor path OR expressions.
+Each managed project/workspace folder gets exactly one color-group object. Related nodes may share a color, but do not combine paths with `or`; Obsidian's Graph query parser does not reliably honor path OR expressions.
 
 ## Required Mutation Ceremony
 
@@ -31,9 +32,9 @@ Each immediate project folder gets exactly one color-group object. Related proje
 
 This interactive ceremony is an exception to silent background brain capture. If it cannot be completed, report graph registration as pending rather than claiming success.
 
-## Register A Project
+## Register A Managed Node
 
-1. Enumerate existing exact `path:projects/<slug>/` groups.
+1. Enumerate existing exact `path:<class>/<slug>/` groups.
 2. If exactly one exists, verify its color against the palette note and stop if correct.
 3. If none exists, select the palette-prescribed color and add one group.
 4. If duplicates exist, retain the correct canonical group and remove duplicates through the mutation ceremony.
@@ -49,7 +50,7 @@ Never transcribe hex and decimal independently. An audit should report mismatche
 
 ## Reconcile The Vault
 
-During consolidation, diff immediate `projects/<slug>/` directories against Graph color groups and report:
+During consolidation, diff configured managed node directories against Graph color groups and report:
 
 - missing project groups;
 - stale groups with no project folder;
@@ -64,5 +65,5 @@ Add missing groups from the palette. Remove a stale group when the related proje
 Run the bundled read-only doctor when available:
 
 ```sh
-npx tsx <brain-skill-directory>/scripts/audit-vault.ts --vault-path "<brain-vault-path>"
+npx tsx <brain-foundation-directory>/scripts/audit-vault.ts --vault-path "<brain-vault-path>"
 ```

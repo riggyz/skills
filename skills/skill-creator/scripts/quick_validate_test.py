@@ -44,11 +44,11 @@ class QuickValidateTests(unittest.TestCase):
             self.assertIn("must match parent directory", message)
 
     def test_packager_excludes_private_config_and_development_files(self):
-        self.assertTrue(should_exclude(Path("brain/references/brain-config.md")))
         self.assertTrue(should_exclude(Path("attribution/references/attribution-config.md")))
         self.assertTrue(should_exclude(Path("brain/evals/evals.json")))
         self.assertFalse(should_exclude(Path("brain/scripts/audit-vault.test.ts")))
         self.assertFalse(should_exclude(Path("brain/references/vault-contract.md")))
+        self.assertFalse(should_exclude(Path("brain/references/brain-config.example.json")))
 
     def test_packager_does_not_include_its_own_output(self):
         with tempfile.TemporaryDirectory() as temp:

@@ -1,191 +1,129 @@
 # Skills
 
-Generic Agent Skills source repo and tooling.
-
-This repository stores skills in the open Agent Skills format used by `npx skills` and compatible agents. Each skill lives in its own directory under `skills/` and contains a required `SKILL.md` file with YAML frontmatter.
+Source repository for reusable Agent Skills in the open format used by `npx skills` and compatible agents.
 
 ## Quick Start
 
-Install Node dependencies:
-
 ```sh
 npm install
-```
-
-List the skills discoverable from this repo:
-
-```sh
 npm run skills:list
-```
-
-Validate all skills and print size/token budget estimates:
-
-```sh
 npm run skills:validate
-```
-
-Run deterministic tests:
-
-```sh
 npm test
-```
-
-## Skills
-
-- `attribution` — configurable attribution rules for GitHub, Linear, Azure DevOps, and similar systems.
-- `brain` — agent-owned cross-session memory, targeted recall, proactive capture, checkpointing, artifacts, and vault maintenance backed by an Obsidian vault.
-- `deep-dive` — substantial project onboarding/refresh workflow that writes an evidence-backed mental model into the brain vault.
-- `skill-creator` — Anthropic's Apache-2.0 skill for creating, reviewing, evaluating, and improving Agent Skills.
-
-## Third-Party Skills
-
-- `skills/skill-creator/` is copied from [`anthropics/skills`](https://github.com/anthropics/skills/tree/main/skills/skill-creator) and keeps its bundled `LICENSE.txt`.
-
-## Install
-
-List the skills in this repo:
-
-```sh
-npm run skills:list
-```
-
-Install every skill globally for every supported agent:
-
-```sh
-npx skills add . --global --all --full-depth
-```
-
-Install a single skill globally:
-
-```sh
-npx skills add . --global --skill brain --full-depth
-```
-
-Install the memory pair specifically for OpenCode:
-
-```sh
-npx skills add . --global --agent opencode --skill brain deep-dive --full-depth --yes
-```
-
-The Skills CLI uses the universal global store at `~/.agents/skills/` for OpenCode and other compatible agents. OpenCode scans that location automatically; an explicit `--agent opencode` install makes the intended consumer unambiguous. Quit and restart OpenCode after installing or updating skills; running sessions keep the skill content they loaded at startup.
-
-Install into the current project instead of globally by omitting `--global`:
-
-```sh
-npx skills add . --skill attribution --full-depth
-```
-
-## Configure Attribution
-
-The `attribution` skill does not hardcode a personal name or emoji. Generate the local config before installing or syncing the skill:
-
-```sh
-npm run configure:attribution -- --name "My Agent" --emoji "<emoji>"
-```
-
-This writes `skills/attribution/references/attribution-config.md`, which is ignored by git.
-
-## Configure Brain
-
-The `brain` skill does not hardcode a vault name or path. Generate the local config before installing or syncing the skill:
-
-```sh
-npm run configure:brain -- --vault-name "my-vault" --vault-path "/absolute/path/to/vault"
-```
-
-Optional overrides:
-
-```sh
-npm run configure:brain -- \
-  --vault-name "my-vault" \
-  --vault-path "/absolute/path/to/vault" \
-  --primary-user-note "person-user.md" \
-  --graph-palette-note "tool-vault-graph.md"
-```
-
-Without overrides, configuration detects a sole canonical `person-*` link/note and `tool-vault-graph.md` when present. If several person notes remain ambiguous after consulting `index.md`'s People section, configuration stops and requires `--primary-user-note` rather than guessing. It also requires an initialized vault with `index.md`. This writes `skills/brain/references/brain-config.md`, which is ignored by git. Without it, the skill stops on first use and asks for configuration.
-
-To make turn-one brain loading deterministic in OpenCode, merge the short bootstrap from `skills/brain/references/host-bootstrap.md` into `~/.config/opencode/AGENTS.md`. Keep the full workflow in the skill rather than duplicating it in global instructions.
-
-## Audit Brain Vault
-
-Run the read-only vault doctor against the configured vault:
-
-```sh
-npm run brain:audit
-```
-
-Or pass another vault explicitly:
-
-```sh
-npm run brain:audit -- --vault-path "/absolute/path/to/vault" --strict
-```
-
-The doctor checks typed/root and project index coverage, canonical graph groups and query overlap, palette RGB conversion, project tags, companion links, relationship reciprocity, startup note sizes, phantom issue tags, and backlog pressure. It never edits the vault.
-
-## Development
-
-Type-check TypeScript scripts:
-
-```sh
 npm run typecheck
 ```
 
-Run the brain doctor fixture tests:
+`npm test` runs deterministic script and corpus tests. Model behavior/trigger evaluations use the `skill-creator` workflow and are reviewed separately.
+
+## Skills
+
+- `attribution`: configurable external-work attribution.
+- `brain`: shared brain-suite foundation, contract, configuration, and router.
+- `brain-contextualize`: read-only turn-one and context-switch orientation.
+- `brain-recall`: bounded read-only memory retrieval.
+- `brain-remember`: proactive/explicit capture and checkpoints.
+- `brain-consolidate`: structural doctor, repair, migration, archive, and forgetting.
+- `brain-synthesize`: cross-owner pattern reporting and automatic high-confidence promotion.
+- `brain-build`: durable onboarding/refresh for repositories, workspaces, wikis, and tools.
+- `skill-creator`: Anthropic's Apache-2.0 skill for creating and evaluating skills.
+
+The seven `brain*` skills form one versioned suite. Install and update them together; operator skills are not standalone packages.
+
+## Configure Brain
+
+Brain deployment configuration lives outside installed skill directories at:
+
+```text
+${XDG_CONFIG_HOME:-$HOME/.config}/agent-brain/config.json
+```
+
+Generate it after the target vault paths exist:
 
 ```sh
+npm run configure:brain -- \
+  --vault-name "oc-brain" \
+  --vault-path "/absolute/path/to/vault" \
+  --primary-context "wikis/user/_user.md" \
+  --graph-palette-node "tools/vault-graph/_vault-graph.md"
+```
+
+The script accepts legacy `--primary-user-note` and `--graph-palette-note` flag names during migration. It requires an initialized vault and verifies every configured Markdown path.
+
+## Install
+
+Install the complete suite globally for OpenCode:
+
+```sh
+npx skills add . --global --agent opencode \
+  --skill brain \
+  --skill brain-contextualize \
+  --skill brain-recall \
+  --skill brain-remember \
+  --skill brain-consolidate \
+  --skill brain-synthesize \
+  --skill brain-build \
+  --yes
+```
+
+Then run `npm run brain:suite:verify` against source and verify installed copies as part of deployment. Remove any legacy installed `deep-dive` skill after `brain-build` is present. Quit and restart OpenCode after changing global skills or `~/.config/opencode/AGENTS.md`.
+
+Install all repository skills for all supported agents only when that is intentional:
+
+```sh
+npx skills add . --global --all
+```
+
+The universal global store is normally `~/.agents/skills/`. Treat installed copies as generated deployments; edit this repository instead.
+
+## Brain Operations
+
+Run the read-only contract-v2 doctor:
+
+```sh
+npm run brain:audit
+npm run brain:audit -- --vault-path "/alternate/vault" --strict
+```
+
+Run the read-only pattern report:
+
+```sh
+npm run brain:patterns -- --vault-path "/absolute/vault" --strict --pretty
+```
+
+The doctor validates root routers, wikis/projects/workspaces/tools, owner tags, atomic records, cold history, workspace membership, project dependencies, global collections, graph groups, issue tags, and backlog state. The pattern reporter only discovers/ranks candidates; `brain-synthesize` performs semantic gates and controlled writes.
+
+## Validation
+
+```sh
+npm run skills:validate:brain-suite
+npm run brain:suite:verify
 npm run test:brain
 ```
 
-Behavior-level prompts live in `skills/brain/evals/evals.json`. `npm test` validates their coverage; execute comparative model runs through the `skill-creator` workflow described in `skills/brain/evals/README.md`.
-
-Validate one skill:
-
-```sh
-npm run skills:validate:attribution
-```
-
-The validator is `skills/skill-creator/scripts/quick_validate.py`. It checks Agent Skills frontmatter and reports static budgets:
-
-- Description character count and estimated tokens.
-- `SKILL.md` line count and estimated tokens.
-- Body line count and estimated tokens.
-- Warnings for descriptions over 1024 characters, bodies over 500 lines, or bodies over roughly 5000 estimated tokens.
-
-Token counts are estimates using a chars/4 heuristic. They are useful for keeping skills lean, not exact model accounting.
+Each operator has an eval corpus under `evals/evals.json`. Joint routing tests must show all seven descriptions together because isolated trigger tests cannot detect `contextualize`/`recall`, `consolidate`/`synthesize`, or `build`/ordinary-build collisions.
 
 ## Layout
 
-```txt
+```text
 skills/
-  <skill-name>/
-    SKILL.md
-    scripts/      # optional
-    references/   # optional
-    assets/       # optional
+  brain/                    # shared contract/config/scripts
+  brain-contextualize/
+  brain-recall/
+  brain-remember/
+  brain-consolidate/
+  brain-synthesize/
+  brain-build/
+  attribution/
+  skill-creator/
 ```
 
-The `name` field in each `SKILL.md` must match its parent directory name.
+Every directory has a `SKILL.md` whose `name` matches the directory. Shared configuration and policy belong only to `brain`; sibling operators load the foundation rather than copying it.
 
-## Repo Guide
+## Development
 
-Use this repo as the source of truth for skills. Installed global OpenCode or Claude skills should be treated as deployed copies, not edited directly.
+- Keep skill descriptions precise and include near-miss exclusions.
+- Keep scripts deterministic, bounded, and dependency-light.
+- Use disposable fixture vaults for tests; never run mutating evaluations against the live vault.
+- Keep evaluation workspaces outside this repository so discovery cannot find snapshot skills.
+- Preserve the vendored `skill-creator/LICENSE.txt` and keep local changes small.
 
-When adding a skill:
-
-1. Create `skills/<skill-name>/SKILL.md`.
-2. Keep the `name` frontmatter equal to `<skill-name>`.
-3. Put trigger guidance in `description`.
-4. Keep core instructions in `SKILL.md`; move long docs to `references/`.
-5. Put deterministic helper code in `scripts/`.
-6. Run `npm run skills:validate` and `npm run skills:list`.
-
-When editing a vendored skill:
-
-- Keep its license file with the skill.
-- Note local changes in this README if they matter.
-- Prefer small patches over rewriting upstream content.
-
-Generated local config files, like attribution identity, should stay ignored by git.
-
-The `.skill` packager excludes generated attribution/brain configuration files so distributable archives cannot leak local identity or vault paths. Direct local installs from this repository intentionally use the configured source tree.
+The `.skill` packager excludes eval directories and attribution's generated private identity config. Brain configuration is external and therefore cannot leak through skill archives.

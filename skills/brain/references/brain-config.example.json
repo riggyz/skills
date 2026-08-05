@@ -1,0 +1,16 @@
+{
+  "contractVersion": 2,
+  "vault": {
+    "name": "your-vault-name",
+    "path": "/absolute/path/to/your/vault"
+  },
+  "startup": {
+    "primaryContext": "wikis/user/_user.md"
+  },
+  "graph": {
+    "paletteNode": null
+  },
+  "synthesis": {
+    "mode": "automatic-high-confidence"
+  }
+}

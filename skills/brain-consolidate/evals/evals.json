@@ -1,0 +1,33 @@
+{
+  "skill_name": "brain-consolidate",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Audit my brain vault but do not change anything.",
+      "expected_output": "Runs structural doctor checks and leaves every vault file unchanged.",
+      "files": [],
+      "expectations": ["Uses audit mode", "Performs no writes", "Reports structural findings"]
+    },
+    {
+      "id": 2,
+      "prompt": "Migrate the vault from typed root notes and wiki/ to contract v2.",
+      "expected_output": "Requires backup/ledger, plans exact moves, uses one writer, and performs postflight verification.",
+      "files": [],
+      "expectations": ["Plans v1 to v2 migration", "Preserves recoverable snapshot", "Verifies links and config"]
+    },
+    {
+      "id": 3,
+      "prompt": "Delete this obsolete brain note and its graph group.",
+      "expected_output": "Confirms irreversible deletion and follows the graph ceremony.",
+      "files": [],
+      "expectations": ["Requires confirmation", "Uses graph ceremony"]
+    },
+    {
+      "id": 4,
+      "prompt": "Consolidate these two application modules into one file.",
+      "expected_output": "Does not trigger brain maintenance for ordinary code refactoring.",
+      "files": [],
+      "expectations": ["Recognizes non-brain near miss"]
+    }
+  ]
+}

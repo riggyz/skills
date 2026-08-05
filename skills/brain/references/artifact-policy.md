@@ -16,12 +16,13 @@ When sensitivity is unclear, ask before copying. A contextual link is safer than
 
 ## Placement
 
-- **Project artifact:** place it directly in `projects/<slug>/` using a descriptive lowercase-kebab filename and link/embed it from the relevant topic note or `references.md`.
-- **Personal/root artifact:** place it at the vault root with a typed, descriptive name tied to its canonical note, such as `person-ethan-resume-2026-07.pdf` or `tool-example-reference-2026-07.pdf`. Link it from that `person-*`, `tool-*`, `pref-*`, or other root note.
-- **Several related references:** create or update a coherent `references.md` for a project. At root, keep the list in the canonical typed note rather than creating a generic unscoped dump.
-- **Agent-authored documentation or diagrams:** store them under the relevant project or root topic when they are useful durable deliverables and should not live in the repo.
+- Place a node-owned artifact directly under `wikis/<slug>/`, `projects/<slug>/`, `workspaces/<slug>/`, or `tools/<slug>/` with a descriptive lowercase-kebab filename.
+- Link/embed it from the focused topic note or `references.md`; the linking note owns scope and provenance.
+- Keep personal artifacts under the primary user wiki, not at root.
+- Keep global-record evidence under the narrow source owner when possible. Use root `history/` only for truly global cold evidence linked from a global record.
+- Agent-authored documentation/diagrams belong under the node that will retrieve them, unless repository documentation is the better authority.
 
-Keep the existing flat project layout. Do not create attachment subtrees merely for organization.
+Do not create attachment subtrees merely for appearance. Atomic record and cold-history directories are semantic/lifecycle boundaries, not generic storage bins.
 
 ## Copy, Do Not Move
 
@@ -48,7 +49,7 @@ Example:
 
 - Images: embed with `![[descriptive-name.png]]`.
 - PDFs/docs: link with `[[descriptive-name.pdf]]` and summarize only the load-bearing parts in Markdown.
-- Excalidraw: keep the drawing project/root scoped and link it from a normal note. Its project tag may live in YAML frontmatter rather than the final line.
+- Excalidraw: keep the drawing node-scoped and link it from a normal note. Its owner tag may live in YAML frontmatter rather than the final line.
 - External-only or frequently changing assets: use a normal Markdown link with source, date, and purpose.
 - Repo-owned documentation: link to the repo path/commit; capture only the agent-specific interpretation or gotcha that the repo does not own.
 

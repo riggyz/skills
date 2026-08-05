@@ -1,0 +1,33 @@
+{
+  "skill_name": "brain-synthesize",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Three independent projects contain verified records for the same generated-cache invalidation trap with complete provenance. Run targeted synthesis.",
+      "expected_output": "Creates one provenance-linked global/tool gotcha and preserves all source records.",
+      "files": [],
+      "expectations": ["Counts independent occurrences", "Promotes narrowest valid gotcha", "Preserves source records", "Is idempotent"]
+    },
+    {
+      "id": 2,
+      "prompt": "A workspace summary and two member notes copy one incident verbatim.",
+      "expected_output": "Collapses the shared lineage and performs no promotion.",
+      "files": [],
+      "expectations": ["Does not inflate copied evidence", "No automatic promotion"]
+    },
+    {
+      "id": 3,
+      "prompt": "Several repositories format code similarly but no user rule or canonical formatter is designated.",
+      "expected_output": "Does not infer a global code-style policy.",
+      "files": [],
+      "expectations": ["Requires normative authority", "Does not infer user intent"]
+    },
+    {
+      "id": 4,
+      "prompt": "Synthesize this supplied meeting transcript into a summary.",
+      "expected_output": "Does not trigger brain-wide synthesis for generic summarization.",
+      "files": [],
+      "expectations": ["Recognizes non-brain near miss"]
+    }
+  ]
+}

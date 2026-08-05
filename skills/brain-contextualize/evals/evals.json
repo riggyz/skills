@@ -1,0 +1,26 @@
+{
+  "skill_name": "brain-contextualize",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "A fresh session starts inside a known project whose entry links many large companions. Describe the ordered brain reads.",
+      "expected_output": "Loads brain config, index, primary context, and only the active entry point; remains silent and read-only.",
+      "files": [],
+      "expectations": ["Loads primary context", "Reads active entry", "Does not load all companions", "Performs no writes"]
+    },
+    {
+      "id": 2,
+      "prompt": "The cwd is /Users/me/src and the user asks to change the service without naming one.",
+      "expected_output": "Does not invent a src node and asks for project identity after global orientation.",
+      "files": [],
+      "expectations": ["Rejects generic parent identity", "Asks for repository identity"]
+    },
+    {
+      "id": 3,
+      "prompt": "A task switches from one project to a named Mesh wiki area.",
+      "expected_output": "Loads the wiki entry point and only the relevant area note if needed.",
+      "files": [],
+      "expectations": ["Reorients to wiki", "Keeps reads bounded", "Does not write"]
+    }
+  ]
+}

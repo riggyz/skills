@@ -1,0 +1,33 @@
+{
+  "skill_name": "brain-build",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Deep dive this unfamiliar repository and create lasting project memory.",
+      "expected_output": "Explores source evidence and builds a revision-backed project node.",
+      "files": [],
+      "expectations": ["Classifies project", "Uses source evidence", "Creates current entry", "Registers node"]
+    },
+    {
+      "id": 2,
+      "prompt": "Learn this multi-repository delivery hub and its member projects.",
+      "expected_output": "Builds a workspace node with reciprocal member links rather than a fake project dependency.",
+      "files": [],
+      "expectations": ["Classifies workspace", "Records members", "Preserves dependency semantics"]
+    },
+    {
+      "id": 3,
+      "prompt": "Build a durable local model of this external company wiki.",
+      "expected_output": "Builds a source-backed wiki node with provenance and open-ended context semantics.",
+      "files": [],
+      "expectations": ["Classifies wiki", "Records source precedence", "Avoids exhaustive project membership"]
+    },
+    {
+      "id": 4,
+      "prompt": "Run npm build and fix the compilation errors.",
+      "expected_output": "Does not trigger brain-build for ordinary software compilation.",
+      "files": [],
+      "expectations": ["Recognizes build near miss"]
+    }
+  ]
+}
