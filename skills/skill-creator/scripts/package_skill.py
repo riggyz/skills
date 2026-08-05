@@ -27,7 +27,6 @@ EXCLUDE_GLOBS = {"*.pyc"}
 EXCLUDE_FILES = {".DS_Store"}
 EXCLUDE_PRIVATE_CONFIGS = {
     ("references", "attribution-config.md"),
-    ("references", "brain-config.md"),
 }
 # Directories excluded only at the skill root (not when nested deeper).
 ROOT_EXCLUDE_DIRS = {"evals"}

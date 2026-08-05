@@ -1,27 +1,27 @@
 ---
-name: deep-dive
-description: Explore an unfamiliar or materially changed repository/workspace and create or refresh its durable project mental model in the configured brain vault. Use for “deep dive,” “fill your brain,” “learn this repo,” onboarding, or when lasting understanding is needed before substantial work. Do not use for quick questions or small fixes.
-compatibility: Requires the configured brain skill, repository read access, and filesystem write access to its Markdown or Obsidian vault. Git is recommended.
+name: brain-build
+description: Build or substantially refresh a durable brain node from unfamiliar or materially changed source evidence. Use for deep dives, filling the brain, learning a repository/workspace/wiki/tool, onboarding, or lasting context before substantial work. Do not use for quick questions, small fixes, ordinary software compilation/build commands, routine recall, or normal capture.
+compatibility: Requires the matching brain foundation, source read access, and vault write access. Git is recommended for repository-backed nodes.
 ---
 
-# Deep Dive
+# Brain Build
 
-Turn repository exploration into durable, evidence-backed project memory. This is the expensive onboarding/refresh workflow for the `brain` system, not an ephemeral codebase summary.
+Turn substantial exploration into a durable, evidence-backed wiki, project, workspace, or tool node. This is not an ordinary software build command or ephemeral summary.
 
 Primary output:
 
 ```text
-<brain-vault-path>/projects/<slug>/_<slug>.md
+<brain-vault-path>/<node-class>/<slug>/_<slug>.md
 ```
 
 Create companion notes only when substantial reusable content earns them.
 
 ## Preconditions
 
-1. Load the `brain` skill and its `references/brain-config.md`.
+1. Load `brain` and its contract-v2 external configuration.
 2. Read the brain's `references/vault-contract.md`.
 3. Confirm repository/workspace read access and vault write access.
-4. If the project already exists in memory, read its entry point before exploration.
+4. If the node already exists, read its entry point before exploration.
 
 If configuration is missing, stop and request it. Do not invent a vault, slug, project identity, or primary repository.
 
@@ -38,14 +38,14 @@ If configuration is missing, stop and request it. Do not invent a vault, slug, p
 
 ## Workflow
 
-### 1. Identify The Canonical Project
+### 1. Identify The Canonical Node
 
-1. Determine whether the unit is one repository, a multi-repo workspace, or a product spanning repositories.
+1. Classify the source: concrete project/repository, explicit multi-project workspace, open-ended person/org/domain wiki, or reusable operational tool.
 2. Resolve the canonical root or URL. In Git, capture `git rev-parse --show-toplevel`, remote URL when useful, current branch/ref, and `git rev-parse HEAD`.
-3. Derive the slug using the brain vault contract; search the existing index/projects for aliases before creating anything.
+3. Derive the slug using the brain vault contract; search all class routers/nodes for aliases before creating anything.
 4. If existing notes are present, read the entry point and only relevant companions. Use them as hypotheses, not ground truth.
 
-For a multi-repo workspace, use the workspace/product identity when that is how future work is entered. Record member repositories and their roles in Layout/Relationships rather than creating accidental duplicate projects per checkout.
+For a workspace, record explicit member project nodes and reciprocal membership. Do not replace project dependencies with workspace membership. A wiki is open-ended context and does not enumerate every relevant project.
 
 ### 2. Explore In Parallel Where Useful
 
@@ -67,7 +67,7 @@ For large repositories, dispatch read-only exploration by subsystem and synthesi
 
 ### 3. Write Or Refresh The Entry Point
 
-Use the exact project-entry template in the brain's `references/vault-contract.md`; do not maintain a second template here.
+Use the exact node contract in the brain foundation; do not maintain a second template here.
 
 Populate `repository`, `verified_at`, and `verified_ref` when available. Use concise prose and direct repo paths/commands. Cite load-bearing mutable claims with source paths or a nearby verification note.
 
@@ -94,23 +94,23 @@ Create a companion only when it improves future retrieval, for example:
 - `references.md`
 - another focused topic note
 
-Link every companion from the entry point with a path-qualified wikilink where basenames repeat. Ordinary project Markdown ends with the project tag; Excalidraw may carry it in frontmatter.
+Link every companion from the entry point with path-qualified wikilinks where basenames repeat. Preserve the node-class owner tag; Excalidraw may carry it in frontmatter.
 
 For screenshots, PDFs, downloaded docs, diagrams, or other external artifacts, follow the brain's `references/artifact-policy.md`. Copy rather than move local sources, record provenance, and link large/sensitive/repo-owned material instead of mirroring it.
 
-### 5. Register Or Reconcile The Project
+### 5. Register Or Reconcile The Node
 
-For a new project, complete the brain vault contract's entire registration checklist:
+For a new node, complete the brain vault contract's registration checklist:
 
 1. Entry point exists at the canonical path.
-2. `index.md` has only its path-qualified link under the correct status.
+2. The matching root class router has one path-qualified link under the correct status.
 3. Real companion notes are linked; no empty stubs exist.
-4. Verified `depends_on`, reciprocal `used_by`, and Relationships prose agree.
-5. When the brain config specifies a Graph palette note, `.obsidian/graph.json` contains exactly one canonical `path:projects/<slug>/` color group chosen from that palette. In a plain Markdown vault without Graph configuration, this step is not applicable.
+4. Project dependencies or workspace memberships are reciprocal and agree with Relationships prose.
+5. When graph policy manages the node class, request the exact path group through the mandatory ceremony. Otherwise record graph registration as not applicable.
 
 When configured, Graph registration is required rather than optional hygiene. Follow the brain's `references/graph-maintenance.md`, including the user closing Graph views and running **Reload app without saving** after the edit. If an applicable ceremony cannot complete, report registration as pending rather than claiming success.
 
-For an existing project, reconcile status, relationships, index placement, companion links, and graph group while preserving unrelated user-owned content.
+For an existing node, reconcile status, relationships, router placement, companion links, and applicable graph group while preserving unrelated user-owned content.
 
 ### 6. Verify
 
@@ -126,8 +126,8 @@ Re-read the entry point and answer:
 Confirm:
 
 - every edited Markdown note with `updated:` has today's date;
-- project tags and links follow the contract;
-- the index contains no duplicated project summary;
+- owner tags and links follow the contract;
+- root/class routers contain no duplicated profile prose;
 - issue/PR identifiers cannot become phantom tags;
 - configured graph registration completed, is explicitly pending, or is correctly not applicable;
 - no secret or repo-owned bulk content was copied into memory.
@@ -139,7 +139,7 @@ obsidian vault=<brain-vault-name> unresolved
 obsidian vault=<brain-vault-name> backlinks path=projects/<slug>/_<slug>.md
 ```
 
-The brain's read-only `audit-vault.ts` doctor can provide broader structural checks.
+Load `brain-synthesize` for a targeted automatic check after eligible structured writes. The brain's read-only doctor provides broader structural checks.
 
 ## Report
 

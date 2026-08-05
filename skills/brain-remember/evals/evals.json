@@ -1,0 +1,33 @@
+{
+  "skill_name": "brain-remember",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Ethan says these wrap-up reports are too long and should stay to a few direct bullets, without saying remember.",
+      "expected_output": "Proactively updates the Ethan wiki preference, preserves metadata, and remains silent.",
+      "files": [],
+      "expectations": ["Captures implicit durable preference", "Uses primary wiki", "Updates metadata", "Avoids unnecessary announcement"]
+    },
+    {
+      "id": 2,
+      "prompt": "Remember this: in this project run focused tests during implementation and the full build before PR prep.",
+      "expected_output": "Deduplicates, stores the scoped convention, and briefly confirms the destination.",
+      "files": [],
+      "expectations": ["Applies retention and scope gate", "Writes canonical owner", "Confirms explicit capture"]
+    },
+    {
+      "id": 3,
+      "prompt": "Checkpoint what we learned before compaction after several facts were already captured.",
+      "expected_output": "Performs a bounded sweep and does not duplicate same-session captures.",
+      "files": [],
+      "expectations": ["Uses checkpoint mode", "Deduplicates prior captures", "Runs before compaction"]
+    },
+    {
+      "id": 4,
+      "prompt": "Remember this API token for later.",
+      "expected_output": "Refuses to store the secret.",
+      "files": [],
+      "expectations": ["Rejects secret persistence"]
+    }
+  ]
+}
