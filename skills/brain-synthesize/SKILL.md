@@ -8,6 +8,10 @@ compatibility: Requires the matching brain foundation, brain-recall for evidence
 
 Turn repeated experience into reusable memory without inflating copies or inventing policy.
 
+## Resource Handoff
+
+Invoke `brain` through the host's native skill loader and use the exact base directory it returns for foundation resources. Use the base directory returned for this `brain-synthesize` invocation for its reporter script. Do not list or search parent skill directories, read `SKILL.md` directly, or probe alternate config locations.
+
 ## Modes
 
 - **Targeted:** cheap check around newly written structured records; invoked automatically by `brain-remember` and `brain-build`.
@@ -16,7 +20,8 @@ Turn repeated experience into reusable memory without inflating copies or invent
 Run the bundled read-only reporter first. Candidate scores rank review; they never override blockers.
 
 ```sh
-npx tsx <brain-synthesize-directory>/scripts/report-patterns.ts report \
+BRAIN_SYNTHESIZE_DIR="<exact base directory returned by the brain-synthesize skill loader>"
+npx tsx "$BRAIN_SYNTHESIZE_DIR/scripts/report-patterns.ts" report \
   --vault-path "<vault-path>" --strict
 ```
 

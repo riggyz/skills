@@ -31,6 +31,9 @@ test("reports missing, mismatched, and legacy skills", () => {
     assert.ok(codes.has("missing-evals"));
     assert.ok(codes.has("missing-skill"));
     assert.ok(codes.has("legacy-skill"));
+    assert.ok(codes.has("unsafe-resource-resolution"));
+    assert.ok(codes.has("missing-config-contract"));
+    assert.ok(codes.has("missing-host-bootstrap"));
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

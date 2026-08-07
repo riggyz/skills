@@ -8,6 +8,10 @@ compatibility: Requires the matching brain foundation and write access to its co
 
 Own normal memory writes. The user should not need magic words.
 
+## Foundation Handoff
+
+Invoke `brain` through the host's native skill loader and use the exact base directory it returns for foundation resources. Do not list or search parent skill directories, read `SKILL.md` directly, or probe alternate config locations.
+
 ## Retention Gate
 
 Write only when an item is durable, useful later, grounded or clearly attributed, scoped to a canonical owner, novel, safe, and not better owned by repository docs or a tracker. Reject secrets, transient progress, raw transcripts, vague complaints, and unsupported conclusions.
@@ -16,7 +20,7 @@ Signals include preferences/corrections, project or workspace constraints, expli
 
 ## Atomic Capture
 
-1. Load `brain` and the vault contract.
+1. Read the vault contract from the loaded foundation's base directory.
 2. Resolve the narrowest owner: wiki, project, workspace, tool, or eligible global collection.
 3. Search the owner and relevant global records for duplicates, supersessions, or contradictions.
 4. Verify or attribute the fact. Keep hypotheses provisional.

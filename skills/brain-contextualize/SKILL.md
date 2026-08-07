@@ -10,7 +10,7 @@ Orient before substantive work without dumping the vault into context.
 
 ## Preconditions
 
-1. Load `brain` and its contract-v2 configuration.
+1. Invoke `brain` through the host's native skill loader and retain the exact base directory it returns for foundation resources. Do not list or search parent skill directories, read `SKILL.md` directly, or probe alternate config locations.
 2. Confirm the configured vault and primary context exist.
 3. Remain read-only. Reading never changes `updated:` or access metadata.
 

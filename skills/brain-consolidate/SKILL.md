@@ -8,6 +8,10 @@ compatibility: Requires the matching brain foundation and appropriate vault acce
 
 Own structural correctness and lifecycle maintenance. Do not invent semantic lessons.
 
+## Foundation Handoff
+
+Invoke `brain` through the host's native skill loader and use the exact base directory it returns for foundation resources and scripts. Do not list or search parent skill directories, read `SKILL.md` directly, or probe alternate config locations.
+
 ## Modes
 
 - **Audit:** run the read-only doctor and report findings.
@@ -17,10 +21,11 @@ Own structural correctness and lifecycle maintenance. Do not invent semantic les
 
 ## Audit
 
-Load `brain` and run:
+Using the exact foundation base directory returned by the skill loader, run:
 
 ```sh
-npx tsx <brain-foundation-directory>/scripts/audit-vault.ts --vault-path "<vault-path>"
+BRAIN_FOUNDATION_DIR="<exact base directory returned by the brain skill loader>"
+npx tsx "$BRAIN_FOUNDATION_DIR/scripts/audit-vault.ts" --vault-path "<vault-path>"
 ```
 
 Check root routers, node registration/tags, atomic record reachability/provenance, workspace membership, project dependency reciprocity, cold-history isolation, links, note sizes, backlog lifecycle, issue tags, and managed graph groups. Orphans alone never prove health.
