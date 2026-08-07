@@ -10,7 +10,7 @@ Retrieve the smallest evidence-backed memory pack that answers the current quest
 
 ## Preconditions
 
-Load `brain`, its config, and shared vault contract. If current context has not been established, use `brain-contextualize` first.
+Invoke `brain` through the host's native skill loader and use the exact base directory it returns for the shared contract. Do not list or search parent skill directories, read `SKILL.md` directly, or probe alternate config locations. If current context has not been established, use `brain-contextualize` first.
 
 ## Retrieval Tiers
 

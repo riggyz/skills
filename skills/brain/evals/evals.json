@@ -28,6 +28,13 @@
       "expected_output": "Routes respectively to recall, remember, consolidate, synthesize, and build.",
       "files": [],
       "expectations": ["Routes to brain-recall", "Routes to brain-remember", "Routes to brain-consolidate", "Routes to brain-synthesize", "Routes to brain-build"]
+    },
+    {
+      "id": 5,
+      "prompt": "The session starts in a non-repository parent directory. brain-contextualize needs the foundation contract, but no skill installation path is configured. Describe how it resolves the foundation resources and config.",
+      "expected_output": "Invokes brain through the native skill loader, uses the exact returned base directory for references, and reads only the canonical external brain config without scanning skill roots or probing fallback locations.",
+      "files": [],
+      "expectations": ["Uses native skill loader", "Uses returned foundation base directory", "Reads canonical agent-brain config", "Does not scan parent skill directories", "Does not probe alternate config paths"]
     }
   ]
 }

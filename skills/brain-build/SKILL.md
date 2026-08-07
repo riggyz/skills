@@ -18,8 +18,8 @@ Create companion notes only when substantial reusable content earns them.
 
 ## Preconditions
 
-1. Load `brain` and its contract-v2 external configuration.
-2. Read the brain's `references/vault-contract.md`.
+1. Invoke `brain` through the host's native skill loader and retain the exact base directory it returns. Do not list or search parent skill directories, read `SKILL.md` directly, or probe alternate config locations.
+2. Read `references/vault-contract.md` from that returned foundation base directory.
 3. Confirm repository/workspace read access and vault write access.
 4. If the node already exists, read its entry point before exploration.
 

@@ -11,6 +11,10 @@ interface SuiteManifest {
   skills: string[];
 }
 
+const RESOURCE_HANDOFF = "native skill loader";
+const DISCOVERY_GUARD = "Do not list or search parent skill directories";
+const CONFIG_PATH = "${XDG_CONFIG_HOME:-$HOME/.config}/agent-brain/config.json";
+
 export interface SuiteFinding {
   code: string;
   path: string;
@@ -55,6 +59,12 @@ export function validateSuite(skillsRoot: string): SuiteFinding[] {
     if (frontmatterName(markdown) !== skill) {
       findings.push({ code: "skill-name-mismatch", path: skillPath, message: `Frontmatter name must be ${skill}` });
     }
+    if (!markdown.includes(RESOURCE_HANDOFF) || !markdown.includes(DISCOVERY_GUARD)) {
+      findings.push({ code: "unsafe-resource-resolution", path: skillPath, message: `${skill} must use native base-directory handoff without parent skill discovery` });
+    }
+    if (skill === "brain" && !markdown.includes(CONFIG_PATH)) {
+      findings.push({ code: "missing-config-contract", path: skillPath, message: `Foundation must declare ${CONFIG_PATH} as the canonical config path` });
+    }
     if (skill !== "brain" && !/\bbrain\b/i.test(markdown)) {
       findings.push({ code: "missing-foundation-reference", path: skillPath, message: `${skill} does not reference the brain foundation` });
     }
@@ -75,6 +85,16 @@ export function validateSuite(skillsRoot: string): SuiteFinding[] {
 
   if (existsSync(join(skillsRoot, "deep-dive", "SKILL.md"))) {
     findings.push({ code: "legacy-skill", path: "deep-dive/SKILL.md", message: "Legacy deep-dive must be removed; use brain-build" });
+  }
+
+  const bootstrapPath = join(skillsRoot, "brain", "references", "host-bootstrap.md");
+  if (!existsSync(bootstrapPath)) {
+    findings.push({ code: "missing-host-bootstrap", path: bootstrapPath, message: "Host bootstrap is missing" });
+  } else {
+    const bootstrap = readFileSync(bootstrapPath, "utf8");
+    if (!bootstrap.includes(RESOURCE_HANDOFF) || !/invoke `brain`[\s\S]*then invoke `brain-contextualize`/i.test(bootstrap) || !bootstrap.includes("Never locate suite skills")) {
+      findings.push({ code: "unsafe-host-bootstrap", path: bootstrapPath, message: "Host bootstrap must load brain before contextualize without filesystem discovery" });
+    }
   }
 
   const discoverable = readdirSync(skillsRoot, { withFileTypes: true })

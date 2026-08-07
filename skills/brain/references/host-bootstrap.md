@@ -15,7 +15,7 @@ Merge this instruction into the existing file; do not overwrite unrelated global
 ```markdown
 ## Brain memory
 
-At turn 1 of every session and after context compaction, run `brain-contextualize` before substantive work; it loads the `brain` foundation itself as a precondition. Do not instruct loading `brain` directly — turn-one entry belongs to `brain-contextualize` alone. From there, use `brain-recall` for targeted retrieval, `brain-remember` proactively for durable capture and checkpoints, `brain-consolidate` for structural maintenance, `brain-synthesize` for cross-owner pattern promotion, and `brain-build` for substantial durable onboarding. Do not load every operator at startup; the user should not have to manage memory curation.
+At turn 1 of every session and after context compaction, invoke `brain` through the host's native skill loader, retain the exact base directory it returns, and then invoke `brain-contextualize` before substantive work. Never locate suite skills by listing or searching parent skill directories, reading `SKILL.md` directly, or probing alternate config paths. From there, use `brain-recall` for targeted retrieval, `brain-remember` proactively for durable capture and checkpoints, `brain-consolidate` for structural maintenance, `brain-synthesize` for cross-owner pattern promotion, and `brain-build` for substantial durable onboarding. Do not load every operator at startup; the user should not have to manage memory curation.
 ```
 
 OpenCode loads configuration-time files once. Quit and restart OpenCode after installing/updating the suite or global `AGENTS.md`; the current session retains already-loaded content.

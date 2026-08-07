@@ -8,14 +8,19 @@ compatibility: Requires filesystem access to the configured Markdown or Obsidian
 
 The brain is agent-owned cross-session memory. This skill defines the shared contract and routes work; focused operator skills perform reads, writes, maintenance, synthesis, and onboarding.
 
+## Resource Resolution
+
+Invoke suite skills through the host's native skill loader. Use the exact base directory returned for this `brain` invocation to resolve its `references/` and `scripts/` resources. Do not list or search parent skill directories, read another `SKILL.md` directly, or probe alternate installation roots to locate suite resources.
+
 ## Configuration
 
-Read `${XDG_CONFIG_HOME:-$HOME/.config}/agent-brain/config.json` before any brain workflow. It must contain `contractVersion: 2`, the vault name/path, a primary context path, and an optional graph palette node. Do not invent or search for an unconfigured vault.
+Read `${XDG_CONFIG_HOME:-$HOME/.config}/agent-brain/config.json` before any brain workflow. This is the only deployment-config location; do not probe skill directories, OpenCode config directories, or legacy paths for alternatives. It must contain `contractVersion: 2`, the vault name/path, a primary context path, and an optional graph palette node. Do not invent or search for an unconfigured vault.
 
 If config is missing, ask the user to run the source repository's `configure:brain` command or:
 
 ```sh
-npx tsx <brain-foundation-directory>/scripts/configure-brain.ts \
+BRAIN_FOUNDATION_DIR="<exact base directory returned by the brain skill loader>"
+npx tsx "$BRAIN_FOUNDATION_DIR/scripts/configure-brain.ts" \
   --vault-name "vault-name" \
   --vault-path "/absolute/path/to/vault" \
   --primary-context "wikis/user/_user.md"
@@ -57,4 +62,4 @@ Use the narrowest durable owner. A workspace groups an explicit project set; a w
 
 ## Lifecycle
 
-`brain` does not own turn-one loading. The host bootstrap in `references/host-bootstrap.md` instructs the host to run `brain-contextualize` at turn one and after compaction; `brain-contextualize` loads this foundation as its own precondition. `brain-remember` remains proactive throughout work. `brain-synthesize` performs cheap targeted checks after eligible writes and full passes only when explicitly invoked or scheduled by a host.
+The host bootstrap in `references/host-bootstrap.md` instructs the host to load this foundation and then `brain-contextualize` at turn one and after compaction. `brain-remember` remains proactive throughout work. `brain-synthesize` performs cheap targeted checks after eligible writes and full passes only when explicitly invoked or scheduled by a host.
