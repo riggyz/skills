@@ -14,6 +14,10 @@ npm run typecheck
 
 `npm test` runs deterministic script and corpus tests. Model behavior/trigger evaluations use the `skill-creator` workflow and are reviewed separately.
 
+For a first-time brain setup, follow this order: initialize the vault,
+install the suite for Codex or OpenCode, configure the vault, then run the
+verification commands in **First-time Verification**.
+
 ## Skills
 
 - `attribution`: configurable external-work attribution.
@@ -27,6 +31,42 @@ npm run typecheck
 - `skill-creator`: Anthropic's Apache-2.0 skill for creating and evaluating skills.
 
 The seven `brain*` skills form one versioned suite. Install and update them together; operator skills are not standalone packages.
+
+## Initialize a Brain Vault
+
+The brain suite expects an initialized Contract v2 Markdown vault; installing the skills does not create one. Before running `configure:brain`, create or migrate a vault with these root routers:
+
+```text
+index.md
+wikis.md
+projects.md
+workspaces.md
+tools.md
+decisions.md
+gotchas.md
+codestyle.md
+improvements.md
+```
+
+`index.md` must link the other eight routers. Create the configured primary context as a node entry point, for example `wikis/user/_user.md`, with `created`, `updated`, and `status` frontmatter and a final owner tag such as `#wiki/user`. Register that entry point in the matching router, for example:
+
+```markdown
+# Wikis
+
+## Active
+
+- [[wikis/user/_user|User]]
+
+## Dormant
+
+## Archived
+
+#index
+```
+
+If you start from an Obsidian vault, remove or migrate its default
+`Welcome.md` note before a strict audit; substantive root notes are reported as
+legacy-root-note findings.
 
 ## Configure Brain
 
@@ -42,15 +82,46 @@ Generate it after the target vault paths exist:
 npm run configure:brain -- \
   --vault-name "oc-brain" \
   --vault-path "/absolute/path/to/vault" \
-  --primary-context "wikis/user/_user.md" \
-  --graph-palette-node "tools/vault-graph/_vault-graph.md"
+  --primary-context "wikis/user/_user.md"
 ```
 
 The script accepts legacy `--primary-user-note` and `--graph-palette-note` flag names during migration. It requires an initialized vault and verifies every configured Markdown path.
 
+`--graph-palette-node` is optional. Add it only when the referenced Markdown
+file already exists in the vault:
+
+```sh
+npm run configure:brain -- \
+  --vault-name "oc-brain" \
+  --vault-path "/absolute/path/to/vault" \
+  --primary-context "wikis/user/_user.md" \
+  --graph-palette-node "tools/vault-graph/_vault-graph.md"
+```
+
 ## Install
 
-Install the complete suite globally for OpenCode:
+Install the complete suite globally for the host you use.
+
+### Codex
+
+```sh
+npx skills add . --global --agent codex \
+  --skill brain \
+  --skill brain-contextualize \
+  --skill brain-recall \
+  --skill brain-remember \
+  --skill brain-consolidate \
+  --skill brain-synthesize \
+  --skill brain-build \
+  --yes
+```
+
+Add the bootstrap from `skills/brain/references/host-bootstrap.md` to
+`~/.codex/AGENTS.md`, then start a new Codex task after changing the global
+instruction file. Codex detects skill changes automatically; restart Codex if
+an installed skill does not appear.
+
+### OpenCode
 
 ```sh
 npx skills add . --global --agent opencode \
@@ -64,7 +135,13 @@ npx skills add . --global --agent opencode \
   --yes
 ```
 
-Then run `npm run brain:suite:verify` against source and verify installed copies as part of deployment. Remove any legacy installed `deep-dive` skill after `brain-build` is present. Quit and restart OpenCode after changing global skills or `~/.config/opencode/AGENTS.md`.
+Merge the bootstrap from `skills/brain/references/host-bootstrap.md` into
+`~/.config/opencode/AGENTS.md`, then quit and restart OpenCode after changing
+global skills or the global instruction file.
+
+For either host, run `npm run brain:suite:verify` against source and verify
+installed copies as part of deployment. Remove any legacy installed
+`deep-dive` skill after `brain-build` is present.
 
 Install all repository skills for all supported agents only when that is intentional:
 
@@ -73,6 +150,25 @@ npx skills add . --global --all
 ```
 
 The universal global store is normally `~/.agents/skills/`. Treat installed copies as generated deployments; edit this repository instead.
+
+## First-time Verification
+
+After the vault is initialized, configured, and the suite is installed, run:
+
+```sh
+npm run brain:suite:verify
+npm run brain:audit -- --strict
+```
+
+The suite verifier checks the source deployment and the audit checks the
+configured vault. A clean Contract v2 vault should report zero errors and zero
+warnings. If you install into a non-default skills root, run the verifier
+directly with that root:
+
+```sh
+npx tsx skills/brain/scripts/validate-suite.ts \
+  --skills-root "/absolute/path/to/installed/skills"
+```
 
 ## Brain Operations
 
