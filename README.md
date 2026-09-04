@@ -21,6 +21,7 @@ verification commands in **First-time Verification**.
 ## Skills
 
 - `attribution`: configurable external-work attribution.
+- `excalidraw`: editable technical diagrams with a mandatory render, inspect, and refine loop.
 - `brain`: shared brain-suite foundation, contract, configuration, and router.
 - `brain-contextualize`: read-only turn-one and context-switch orientation.
 - `brain-recall`: bounded read-only memory retrieval.
@@ -201,6 +202,7 @@ Each operator has an eval corpus under `evals/evals.json`. Joint routing tests m
 
 ```text
 skills/
+  excalidraw/               # Excalidraw workflow and visual quality loop
   brain/                    # shared contract/config/scripts
   brain-contextualize/
   brain-recall/

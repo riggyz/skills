@@ -1,0 +1,23 @@
+{
+  "skill_name": "excalidraw",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create an editable Excalidraw architecture diagram for this service: browser to API gateway, then auth and orders services, with Postgres and Redis behind them. Save a PNG preview too.",
+      "expected_output": "Creates an editable scene and preview, visually inspects the rendered image, fixes layout defects, and reports both paths.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Update docs/runtime.excalidraw so the worker now writes artifacts to object storage instead of Postgres. Keep the rest of the diagram stable.",
+      "expected_output": "Imports and inspects the existing scene, makes a minimal ID-based edit, then re-renders and checks the full canvas.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Make an Excalidraw diagram in my Obsidian brain that explains the deployment flow and link it to the current project note.",
+      "expected_output": "Produces native .excalidraw.md with a normal Links section, registers it from current memory, and visually verifies the rendered canvas.",
+      "files": []
+    }
+  ]
+}
