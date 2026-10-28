@@ -30,6 +30,7 @@ verification commands in **First-time Verification**.
 - `brain-synthesize`: cross-owner pattern reporting and automatic high-confidence promotion.
 - `brain-build`: durable onboarding/refresh for repositories, workspaces, wikis, and tools.
 - `skill-creator`: Anthropic's Apache-2.0 skill for creating and evaluating skills.
+- `subagent-models`: lightweight model selection by delegated work class, with evidence-based escalation.
 
 The seven `brain*` skills form one versioned suite. Install and update them together; operator skills are not standalone packages.
 
@@ -152,6 +153,12 @@ npx skills add . --global --all
 
 The universal global store is normally `~/.agents/skills/`. Treat installed copies as generated deployments; edit this repository instead.
 
+Install just the subagent model-routing guide globally for OpenCode:
+
+```sh
+npx skills add . --global --agent opencode --skill subagent-models --yes
+```
+
 ## First-time Verification
 
 After the vault is initialized, configured, and the suite is installed, run:
@@ -212,6 +219,7 @@ skills/
   brain-build/
   attribution/
   skill-creator/
+  subagent-models/
 ```
 
 Every directory has a `SKILL.md` whose `name` matches the directory. Shared configuration and policy belong only to `brain`; sibling operators load the foundation rather than copying it.
